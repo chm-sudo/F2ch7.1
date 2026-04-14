@@ -17,7 +17,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding-bottom: env(safe-area-inset-bottom); /* 確保 iPad 底部安全區域 */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .paper-sheet {
@@ -89,11 +89,13 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
+            /* 確保按鈕區域可點擊 */
+            pointer-events: auto;
         }
 
         #verify-btn {
-            width: 75px;
-            height: 75px;
+            width: 80px;
+            height: 80px;
             background: #d97706;
             color: white;
             border-radius: 9999px;
@@ -103,11 +105,14 @@
             justify-content: center;
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
             border: 4px solid white;
+            /* 防止 iOS 延遲 */
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
         }
 
         #verify-btn:active {
-            transform: scale(0.9);
+            transform: scale(0.9) translateX(0%);
             background: #b45309;
         }
 
@@ -157,13 +162,13 @@
                     </div>
                 </div>
                 <div id="text-canvas" class="selectable-text font-serif"></div>
-                <div class="h-28"></div>
+                <div class="h-32"></div>
             </div>
 
             <div id="verify-container">
                 <button id="verify-btn" type="button">
-                    <span class="text-xl">✔️</span>
-                    <span class="text-[10px] font-black uppercase">Verify</span>
+                    <span class="text-2xl">✔️</span>
+                    <span class="text-xs font-black uppercase">驗證</span>
                 </button>
             </div>
         </div>
@@ -221,7 +226,7 @@
     </div>
 
     <script>
-        // 資料定義與 JS 邏輯 (保持穩定)
+        // 資料定義
         const articleText = [
             "(1) 我在這裡寫的「值得擔憂」，不限於中國，而是全世界。",
             "(2) 最近有友人從山東歸來，帶給我一些周村燒餅。過去只是十個或八九個一摞，用白紙一包，即可出售。燒餅吃完，把紙一揉，變成垃圾，佔地也不多。",
@@ -275,12 +280,22 @@
 
         let currentStepIdx = 0, collectedInStep = 0, totalFail = 0;
 
+        // 初始化
         function init() {
             try {
                 const canvas = document.getElementById('text-canvas');
                 canvas.innerHTML = articleText.map(t => `<p class="mb-4">${t}</p>`).join('');
-                document.getElementById('verify-btn').onclick = checkSelection;
+                
+                // 綁定按鈕 (onclick + ontouchend 終極防禦)
+                const vBtn = document.getElementById('verify-btn');
+                vBtn.onclick = checkSelection;
+                vBtn.ontouchend = function(e) {
+                    e.preventDefault(); // 防止某些瀏覽器觸發兩次
+                    checkSelection();
+                };
+
                 document.getElementById('final-submit-btn').onclick = submitAndFinish;
+                
                 updateTask();
             } catch (err) { alert("啟動錯誤: " + err.message); }
         }
@@ -289,8 +304,16 @@
             const selection = window.getSelection();
             const selectedText = selection.toString().trim();
             const flow = gameFlow[currentStepIdx];
-            if (collectedInStep >= flow.evidences.length) return;
-            if (!selectedText) { showFeedback("⚠️ 請先在左側文中選取文字", "text-red-500"); return; }
+            
+            if (collectedInStep >= flow.evidences.length) {
+                showFeedback("💡 證據已齊，請點擊右側合成", "text-amber-600");
+                return;
+            }
+
+            if (!selectedText) {
+                showFeedback("⚠️ 請先在文中選取文字", "text-red-500");
+                return;
+            }
 
             const clean = (s) => s.replace(/[\s\r\n\t\(\)\d\.,，。：「」『』!！?？]/g, "");
             const cleaned = clean(selectedText);
@@ -307,12 +330,14 @@
             } else {
                 totalFail++;
                 document.getElementById('fail-counter').innerText = totalFail;
-                showFeedback("✗ 不夠精準，再試一次", "text-red-500");
+                showFeedback("✗ 選取不精準，再試一次", "text-red-500");
                 const hc = document.getElementById('hint-container');
                 hc.classList.remove('hidden');
                 hc.innerText = "💡 提示：" + target.hint;
             }
         }
+
+        // --- 其餘邏輯保持穩定 ---
 
         function addEvidence(label, text) {
             const div = document.createElement('div');
@@ -334,7 +359,7 @@
                 btn.className = "mt-1 w-full py-3 bg-stone-300 text-stone-400 rounded-xl font-black";
             } else {
                 document.getElementById('task-stage').innerText = "證據備齊";
-                document.getElementById('task-desc').innerText = "證據收集完成，點擊下方按鈕合成邏輯！";
+                document.getElementById('task-desc').innerText = "證據收集完成，點擊下方開始合成！";
                 btn.disabled = false;
                 btn.className = "mt-1 w-full py-3 bg-amber-600 text-white rounded-xl font-black shadow-lg";
                 btn.onclick = startCloze;
@@ -357,6 +382,7 @@
             const popover = document.getElementById('mc-popover');
             popover.innerHTML = '';
             const opts = gameFlow[currentStepIdx].mcOptions[slot.dataset.answer];
+            
             opts.forEach(opt => {
                 const div = document.createElement('div');
                 div.className = "p-3 border-b last:border-0 active:bg-amber-100 cursor-pointer text-sm font-bold";
@@ -369,6 +395,7 @@
                 };
                 popover.appendChild(div);
             });
+
             const rect = slot.getBoundingClientRect();
             popover.style.display = 'flex';
             popover.style.top = (rect.bottom + window.scrollY) + "px";
@@ -382,9 +409,20 @@
                 if (s.innerText.includes("點擊")) filled = false;
                 if (s.innerText !== s.dataset.answer) ok = false;
             });
-            if (!filled) { showFeedback("請完成填空", "text-amber-600"); return; }
-            if (ok) { showFeedback("✓ 合成成功！", "text-green-600"); finalizeStep(); }
-            else { totalFail++; document.getElementById('fail-counter').innerText = totalFail; showFeedback("✗ 邏輯有誤，請重選", "text-red-500"); }
+
+            if (!filled) {
+                showFeedback("請完成填空", "text-amber-600");
+                return;
+            }
+
+            if (ok) {
+                showFeedback("✓ 合成成功！", "text-green-600");
+                finalizeStep();
+            } else {
+                totalFail++;
+                document.getElementById('fail-counter').innerText = totalFail;
+                showFeedback("✗ 邏輯有誤，請重選", "text-red-500");
+            }
         }
 
         function finalizeStep() {
@@ -393,14 +431,18 @@
             p.className = "p-2 bg-white border-l-4 border-amber-600 text-xs font-bold shadow-sm mb-2";
             p.innerText = "📍 " + f.synthesis;
             document.getElementById('target-points').appendChild(p);
+            
             currentStepIdx++;
             collectedInStep = 0;
+            
             setTimeout(() => {
                 if (currentStepIdx < gameFlow.length) {
                     document.getElementById('cloze-area').classList.add('hidden');
                     updateTask();
                     document.getElementById('synth-btn').innerText = "等待證據";
-                } else { document.getElementById('name-modal').style.display = 'flex'; }
+                } else {
+                    document.getElementById('name-modal').style.display = 'flex';
+                }
             }, 800);
         }
 
@@ -408,6 +450,14 @@
             const uClass = document.getElementById('user-class').value.trim();
             const uName = document.getElementById('user-name').value.trim();
             if (!uClass || !uName) { alert("請填寫班別與姓名"); return; }
+            
+            // 靜默提交數據 (no-cors 模式避免報錯)
+            const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwCZc8JvRxTjx6O7jKrIn6IssYxmxMT1EYYCl6DClMtqezbwxhu4IeUMWahuhxWzE2w2A/exec";
+            const now = new Date();
+            const dateStr = now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate();
+            const queryUrl = `${WEB_APP_URL}?class=${encodeURIComponent(uClass)}&name=${encodeURIComponent(uName)}&fails=${totalFail}&time=${encodeURIComponent(dateStr)}`;
+            fetch(queryUrl, { mode: 'no-cors' }).catch(e => console.log("Silent catch"));
+
             document.getElementById('display-class').innerText = uClass;
             document.getElementById('display-name').innerText = uName;
             document.getElementById('display-title').innerText = totalFail <= 3 ? "🌿 環保包裝美學大師" : "🛡️ 拒絕虛榮包裝先鋒";
