@@ -13,6 +13,10 @@
             background-image: url('https://www.transparenttextures.com/patterns/cardboard-flat.png');
             font-family: 'Noto Sans TC', sans-serif;
             overflow: hidden;
+            /* 修正 iPad 橡皮筋回彈效果 */
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         .paper-sheet {
@@ -20,32 +24,22 @@
             box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
             border: 1px solid #ddd;
             position: relative;
+            -webkit-overflow-scrolling: touch; /* 優化 iPad 滾動 */
         }
 
         .selectable-text {
             user-select: text !important;
             -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
             line-height: 2.2;
             font-size: 1.2rem;
             color: #2d2d2d;
-        }
-
-        .selectable-text::selection {
-            background: rgba(217, 119, 6, 0.3);
+            /* 確保在 iPad 上點擊不會意外跳出系統選單 */
+            -webkit-touch-callout: default;
         }
 
         .cardboard-panel {
             background-color: #f5e6d3;
             border: 2px solid #d4b483;
-        }
-
-        .tape-label {
-            background-color: #d97706;
-            color: white;
-            padding: 2px 12px;
-            transform: rotate(-1deg);
         }
 
         .drop-slot {
@@ -62,6 +56,9 @@
             cursor: pointer;
             font-weight: bold;
             color: #b45309;
+            /* 防止選取文字時選到按鈕文字 */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #mc-popover {
@@ -77,392 +74,34 @@
             gap: 6px;
         }
 
-        .mc-option {
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            background: #fdfaf7;
-            border: 1px solid #eee;
-        }
-
         .modal-overlay {
             background: rgba(0, 0, 0, 0.6);
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 200;
+            z-index: 2000;
             backdrop-filter: blur(4px);
-        }
-
-        .certificate-paper {
-            background: #fdf6ec;
-            border: 8px double #b08d57;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
         }
 
         #verify-container {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 50;
+            z-index: 999;
+            /* 確保按鈕在最上層 */
+            pointer-events: auto;
         }
 
         #verify-btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(217, 119, 6, 0.9);
+            width: 80px;
+            height: 80px;
+            background: #d97706;
             color: white;
             border-radius: 9999px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 3px solid white;
-            transition: all 0.2s;
-        }
-
-        #verify-btn:active {
-            transform: scale(0.9);
-            background: #b45309;
-        }
-    </style>
-</head>
-<body class="h-screen flex flex-col p-4 gap-4">
-
-    <div id="mc-popover"></div>
-
-    <div class="flex justify-between items-center bg-white border-b-4 border-amber-600 p-4 rounded-xl shadow-md">
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">🔍</span>
-            <h1 class="text-amber-900 font-black text-lg">邏輯獵手：證據追蹤</h1>
-        </div>
-        <div class="flex items-center gap-6">
-            <div class="text-sm font-bold text-stone-500">累積錯誤：<span id="fail-counter" class="text-red-600">0</span></div>
-            <div class="text-xl font-black text-amber-900" id="progress-val">1 / 4</div>
-        </div>
-    </div>
-
-    <div class="flex-1 flex flex-col md:flex-row gap-4 overflow-hidden">
-        
-        <div class="flex-[2.2] relative flex flex-col overflow-hidden">
-            <div id="scroll-area" class="paper-sheet flex-1 rounded-2xl p-6 md:p-8 overflow-y-auto border-b-4 border-gray-200">
-                <div class="mb-4">
-                    <span class="tape-label font-bold text-xs">請選取文中對應的證據文字</span>
-                </div>
-                <div id="text-canvas" class="selectable-text font-serif"></div>
-                <div class="h-24"></div>
-            </div>
-
-            <div id="verify-container">
-                <button id="verify-btn" onclick="checkSelection()">
-                    <span class="text-xl">✔️</span>
-                    <span class="text-[10px] font-bold">驗證</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex-[2.5] flex flex-col gap-4">
-            <div class="cardboard-panel flex-1 rounded-2xl p-5 flex flex-col shadow-inner overflow-hidden">
-                <div id="hint-container" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-800 text-sm mb-3"></div>
-
-                <div id="synth-container" class="bg-white/95 p-5 rounded-xl border-2 border-amber-200 shadow-sm flex-1 flex flex-col overflow-y-auto">
-                    <div id="task-info">
-                        <span id="task-stage" class="text-xs font-black text-amber-600 uppercase bg-amber-50 px-2 py-1 rounded">正在初始化</span>
-                        <p id="task-desc" class="text-stone-800 font-bold leading-relaxed text-lg mt-3"></p>
-                    </div>
-
-                    <div id="cloze-area" class="hidden mt-6 pt-6 border-t-2 border-dashed border-amber-100">
-                        <p class="text-xs text-amber-700 font-bold mb-4 uppercase tracking-widest">🧩 點擊空格選擇正確字詞：</p>
-                        <div id="cloze-sentence" class="text-stone-800 leading-loose text-lg font-medium bg-amber-50/50 p-4 rounded-lg"></div>
-                    </div>
-
-                    <div id="target-points" class="mt-6 space-y-3"></div>
-                </div>
-
-                <div id="feedback-area" class="h-6 text-center text-xs font-bold mt-2"></div>
-                <button id="synth-btn" class="mt-2 w-full py-4 bg-stone-300 text-stone-500 rounded-xl font-black text-lg border-b-4 border-stone-400" disabled>
-                    等待收集證據
-                </button>
-            </div>
-        </div>
-
-        <div class="flex-[1] bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-2xl p-4 flex flex-col overflow-hidden">
-            <h3 class="text-amber-800 font-bold text-xs mb-3 text-center">📥 證據籃</h3>
-            <div id="evidence-basket" class="flex-1 overflow-y-auto space-y-3"></div>
-        </div>
-    </div>
-
-    <div id="name-modal" class="fixed inset-0 modal-overlay p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 border-amber-600 max-w-sm w-full">
-            <h2 class="text-2xl font-black text-amber-900 mb-6 text-center">任務完成！</h2>
-            <div class="space-y-4">
-                <input type="text" id="user-class" placeholder="請輸入班別 (例如 4A)" class="w-full p-4 border-2 border-amber-100 rounded-xl font-bold outline-none">
-                <input type="text" id="user-name" placeholder="請輸入姓名" class="w-full p-4 border-2 border-amber-100 rounded-xl font-bold outline-none">
-                <button id="submit-btn" onclick="submitAndFinish()" class="w-full py-5 bg-amber-600 text-white rounded-xl font-black text-xl shadow-lg transition-all hover:bg-amber-700">提交並領取證書</button>
-                <div id="upload-status" class="text-center text-xs text-stone-400 h-4"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="finish-screen" class="fixed inset-0 modal-overlay p-4">
-        <div class="certificate-paper text-center relative">
-            <h2 class="text-3xl font-black text-amber-900 mb-6 border-b-2 border-amber-200 pb-4">榮 譽 證 書</h2>
-            <p class="text-lg mb-4 text-stone-700">恭喜 <span id="display-class" class="font-bold"></span> <span id="display-name" class="font-bold"></span> 同學：</p>
-            <p class="text-base text-stone-800 mb-6 text-justify px-4">你在《邏輯獵手》任務中，成功重構了季羡林先生關於環保與資源的邏輯鏈條，表現優異！</p>
-            <div class="bg-amber-100/50 p-6 rounded-xl border-2 border-dashed border-amber-300 mb-6">
-                <p class="text-xs text-amber-800 mb-2">獲得稱號</p>
-                <h3 id="display-title" class="text-2xl font-black text-amber-900"></h3>
-            </div>
-            <div class="flex justify-around text-xs text-stone-400 mb-4">
-                <span>錯誤次數：<span id="display-fail"></span></span>
-                <span>完成日期：<span id="display-date"></span></span>
-            </div>
-            <button onclick="location.reload()" class="mt-8 text-amber-600 text-xs underline">重新開始</button>
-        </div>
-    </div>
-
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwCZc8JvRxTjx6O7jKrIn6IssYxmxMT1EYYCl6DClMtqezbwxhu4IeUMWahuhxWzE2w2A/exec";
-
-        const articleText = [
-            "(1) 我在這裡寫的「值得擔憂」，不限於中國，而是全世界。",
-            "(2) 最近有友人從山東歸來，帶給我一些周村燒餅。過去只是十個或八九個一摞，用白紙一包，即可出售。燒餅吃完，把紙一揉，變成垃圾，佔地也不多。",
-            "(3) 現在完全換了新裝，不是白紙，而是鐵盒，彩繪燙金，光彩奪目。夥頤！我的老朋友闊起來了！這幾個燒餅能值幾個錢？這金碧輝煌的鐵盒值多少錢？顯然後者比前者要貴得多。可是哪一個有使用價值呢？又顯然是前者。",
-            "(4) 到了今天，人類大大地進步了，卻愈來愈蠢了，會自己製造垃圾，以致垃圾成為一個世界性問題。將來人類只能在垃圾堆裏討生活了。我看一看古代人，他們生活多麼簡樸，那裡有多少垃圾。現在每一個國家都為處理垃圾而大傷腦筋。",
-            "(5) 地球村裏資源畢竟是有限制的。東坡認為造物無盡藏，是不正確的。造物是有盡藏的，用之是有竭的。有識之士已經感覺到，人類已經是「盲人騎瞎馬，夜半臨深池」。",
-            "(6) 我希望有聰明智慧的中國人，懸崖勒馬，改弦更張，再也不製造那一種大而無當的商品包裝，給我們的子孫後代多留下一點大自然的資源。"
-        ];
-
-        const gameFlow = [
-            {
-                step: 1,
-                evidences: [
-                    { q: "1. 找出：周村燒餅原本的包裝方法", keywords: ["過去", "白紙一包"], label: "舊有包裝", hint1: "第 (2) 段。", hint2: "關鍵：白紙。" },
-                    { q: "2. 找出：現今周村燒餅的包裝", keywords: ["現在", "鐵盒", "彩繪燙金"], label: "新式包裝", hint1: "第 (3) 段。", hint2: "關鍵：鐵盒、彩繪。" },
-                    { q: "3. 找出：商品價值與包裝成本的對比關係", keywords: ["後者比前者要貴", "值多少錢"], label: "價值倒置", hint1: "第 (3) 段後半。", hint2: "關鍵：後者更貴。" }
-                ],
-                cloze: "分論點：現代商品{過度包裝}，商品包裝成本{遠高於}商品實際價值，造成{浪費}。",
-                mcOptions: { "過度包裝": ["簡單包裝", "過度包裝", "沒有包裝"], "遠高於": ["遠低於", "等同於", "遠高於"], "浪費": ["節約", "浪費", "美觀"] },
-                synthesis: "分論點一：過度包裝造成價值失衡與浪費。"
-            },
-            {
-                step: 2,
-                evidences: [
-                    { q: "4. 找出：文中對古今處理垃圾情況的對比", keywords: ["古代人", "簡樸", "大傷腦筋"], label: "環境問題", hint1: "第 (4) 段。", hint2: "關鍵：古代、大傷腦筋。" }
-                ],
-                cloze: "分論點：這些現象持續下去會製造大量{垃圾}，最後演變成{全球性問題}。",
-                mcOptions: { "垃圾": ["財富", "垃圾", "糧食"], "全球性問題": ["個人問題", "全球性問題", "暫時性問題"] },
-                synthesis: "分論點二：垃圾處理已演變為全球性危機。"
-            },
-            {
-                step: 3,
-                evidences: [
-                    { q: "5. 找出：文中提及資源性質的描述及其潛在危機", keywords: ["無盡藏", "不正確", "耗盡", "有竭"], label: "資源危機", hint1: "第 (5) 段。", hint2: "關鍵：無盡藏、有竭。" }
-                ],
-                cloze: "分論點：自然資源並非{不竭}，若人類繼續{浪費}，資源終有一天會{耗盡}。",
-                mcOptions: { "不竭": ["有限", "不竭", "廉價"], "浪費": ["珍惜", "浪費", "開發生產"], "耗盡": ["再生", "耗盡", "增加"] },
-                synthesis: "分論點三：人類必須為後代留存有限資源。"
-            },
-            {
-                step: 4,
-                evidences: [
-                    { q: "6. 找出：作者對聰明中國人的具體建議", keywords: ["懸崖勒馬", "改弦更張", "子孫後代"], label: "行動建議", hint1: "第 (6) 段。", hint2: "關鍵：懸崖勒馬。" },
-                    { q: "7. 找出：全文開篇點出的「最核心感受」", keywords: ["值得擔憂", "全世界"], label: "核心論點", hint1: "第 (1) 段。", hint2: "關鍵：值得擔憂。" }
-                ],
-                cloze: "中心論點：商品過度包裝的問題，{值得擔憂}。我們應{不再製造大而無當的包裝}，給子孫後代留下一點資源。",
-                mcOptions: { "值得擔憂": ["值得擔憂", "值得慶賀", "微不足道"], "不再製造大而無當的包裝": ["加強包裝", "不再製造大而無當的包裝", "推廣鐵盒"] },
-                synthesis: "中心論點：過度包裝值得擔憂，必須改弦更張。"
-            }
-        ];
-
-        let currentStepIdx = 0, collectedInStep = 0, totalFail = 0, currentFail = 0;
-
-        function init() {
-            const canvas = document.getElementById('text-canvas');
-            canvas.innerHTML = articleText.map(t => `<p class="mb-5">${t}</p>`).join('');
-            updateTask();
-        }
-
-        function checkSelection() {
-            const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
-            const flow = gameFlow[currentStepIdx];
-            
-            if (collectedInStep >= flow.evidences.length) {
-                showFeedback("💡 證據已齊全，請點擊右下角開始合成", "text-amber-600");
-                return;
-            }
-
-            const target = flow.evidences[collectedInStep];
-            if (!selectedText) {
-                showFeedback("⚠️ 請先在左側文中選取文字", "text-amber-600");
-                return;
-            }
-
-            const clean = (s) => s.replace(/[\s\r\n\t\(\)\d\.,，。：「」『』!！?？]/g, "");
-            const cleaned = clean(selectedText);
-            const isCorrect = target.keywords.some(k => cleaned.includes(clean(k)));
-
-            if (isCorrect && cleaned.length > 2) {
-                addEvidence(target.label, selectedText);
-                collectedInStep++;
-                showFeedback("✓ 正確獲得證據！", "text-green-600");
-                currentFail = 0;
-                selection.removeAllRanges(); 
-                updateTask();
-            } else {
-                currentFail++; totalFail++;
-                document.getElementById('fail-counter').innerText = totalFail;
-                showFeedback("✗ 選取不精準，再試一次", "text-red-500");
-                showHint(target);
-            }
-        }
-
-        function addEvidence(label, text) {
-            const div = document.createElement('div');
-            div.className = "bg-white p-3 rounded-lg border-l-4 border-amber-500 shadow-sm text-xs animate-slide-in";
-            div.innerHTML = `<b class="text-amber-600">【${label}】</b><br>${text.substring(0, 40)}${text.length > 40 ? '...' : ''}`;
-            const basket = document.getElementById('evidence-basket');
-            basket.insertBefore(div, basket.firstChild);
-        }
-
-        function showHint(target) {
-            const h = document.getElementById('hint-container');
-            h.classList.remove('hidden');
-            h.innerText = currentFail === 1 ? `提示：${target.hint1}` : `提示：${target.hint1} ${target.hint2}`;
-        }
-
-        function updateTask() {
-            const flow = gameFlow[currentStepIdx];
-            document.getElementById('progress-val').innerText = `${currentStepIdx + 1} / 4`;
-            const btn = document.getElementById('synth-btn');
-            const verifyBtn = document.getElementById('verify-btn');
-            
-            if (collectedInStep < flow.evidences.length) {
-                document.getElementById('task-stage').innerText = `提取證據 (${collectedInStep}/${flow.evidences.length})`;
-                document.getElementById('task-desc').innerText = flow.evidences[collectedInStep].q;
-                btn.disabled = true;
-                btn.className = "mt-2 w-full py-4 bg-stone-200 text-stone-400 rounded-xl font-black";
-                verifyBtn.style.opacity = "1";
-            } else {
-                document.getElementById('task-stage').innerText = "證據備齊";
-                document.getElementById('task-desc').innerText = "請點擊下方開始邏輯合成！";
-                btn.disabled = false;
-                btn.innerText = "✨ 開始邏輯合成";
-                btn.className = "mt-2 w-full py-4 bg-amber-600 text-white rounded-xl font-black shadow-lg";
-                btn.onclick = startCloze;
-                verifyBtn.style.opacity = "0.5";
-            }
-        }
-
-        function startCloze() {
-            const flow = gameFlow[currentStepIdx];
-            document.getElementById('cloze-area').classList.remove('hidden');
-            document.getElementById('cloze-sentence').innerHTML = flow.cloze.replace(/\{(.+?)\}/g, (m, p1) => `<span class="drop-slot" data-answer="${p1}" onclick="showMC(this, event)">點擊選擇</span>`);
-            const btn = document.getElementById('synth-btn');
-            btn.innerText = "驗證邏輯";
-            btn.onclick = verifyCloze;
-        }
-
-        function showMC(slot, event) {
-            const popover = document.getElementById('mc-popover');
-            popover.innerHTML = '';
-            gameFlow[currentStepIdx].mcOptions[slot.dataset.answer].forEach(opt => {
-                const div = document.createElement('div');
-                div.className = "mc-option";
-                div.innerText = opt;
-                div.onclick = () => { slot.innerText = opt; slot.style.background = "#fffbeb"; popover.style.display = 'none'; };
-                popover.appendChild(div);
-            });
-            const rect = slot.getBoundingClientRect();
-            popover.style.display = 'flex';
-            popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
-            popover.style.left = `${rect.left}px`;
-            event.stopPropagation();
-        }
-
-        function verifyCloze() {
-            const slots = document.querySelectorAll('.drop-slot');
-            let ok = true, filled = true;
-            slots.forEach(s => { 
-                if(s.innerText === "點擊選擇") filled = false; 
-                if(s.innerText !== s.dataset.answer) ok = false; 
-            });
-            if(!filled) return showFeedback("請完成所有空格", "text-amber-600");
-            if(ok) { 
-                showFeedback("✓ 合成成功！", "text-green-600"); 
-                finalizeStep(); 
-            } else { 
-                totalFail++;
-                document.getElementById('fail-counter').innerText = totalFail;
-                showFeedback("✗ 邏輯有誤", "text-red-500"); 
-                slots.forEach(s => s.innerText = '點擊選擇');
-            }
-        }
-
-        function finalizeStep() {
-            const f = gameFlow[currentStepIdx];
-            const p = document.createElement('div');
-            p.className = `p-3 rounded-lg border-l-4 shadow-sm bg-white border-amber-600 text-sm font-bold`;
-            p.innerText = f.synthesis;
-            document.getElementById('target-points').appendChild(p);
-            currentStepIdx++; collectedInStep = 0;
-            if(currentStepIdx < gameFlow.length) {
-                setTimeout(() => { document.getElementById('cloze-area').classList.add('hidden'); updateTask(); }, 1500);
-            } else {
-                setTimeout(() => document.getElementById('name-modal').style.display = 'flex', 1000);
-            }
-        }
-
-        async function submitAndFinish() {
-            const uClass = document.getElementById('user-class').value.trim();
-            const uName = document.getElementById('user-name').value.trim();
-            const submitBtn = document.getElementById('submit-btn');
-            const statusText = document.getElementById('upload-status');
-
-            if(!uClass || !uName) { alert("請填寫班別與姓名"); return; }
-
-            submitBtn.disabled = true;
-            statusText.innerText = "數據上傳中...";
-
-            const now = new Date();
-            const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
-
-            // 使用 GET 請求 (doGet) 是最穩定的 Google Script 數據收集方式
-            const queryUrl = `${WEB_APP_URL}?class=${encodeURIComponent(uClass)}&name=${encodeURIComponent(uName)}&fails=${totalFail}&time=${encodeURIComponent(dateStr)}`;
-
-            try {
-                // 使用 mode: 'no-cors' 以防跨網域問題
-                await fetch(queryUrl, { mode: 'no-cors' });
-                generateCertificate(uClass, uName, dateStr);
-            } catch (err) {
-                console.error("提交異常:", err);
-                generateCertificate(uClass, uName, dateStr);
-            }
-        }
-
-        function generateCertificate(uClass, uName, dateStr) {
-            document.getElementById('display-class').innerText = uClass;
-            document.getElementById('display-name').innerText = uName;
-            document.getElementById('display-fail').innerText = totalFail;
-            document.getElementById('display-date').innerText = dateStr.split(' ')[0];
-            document.getElementById('display-title').innerText = totalFail <= 3 ? "🌿 環保包裝美學大師" : "🛡️ 拒絕虛榮包裝先鋒";
-            document.getElementById('name-modal').style.display = 'none';
-            document.getElementById('finish-screen').style.display = 'flex';
-        }
-
-        function showFeedback(m, c) {
-            const el = document.getElementById('feedback-area');
-            el.innerText = m; el.className = `h-6 text-center text-xs font-bold ${c}`;
-        }
-
-        window.onclick = () => { document.getElementById('mc-popover').style.display = 'none'; };
-        window.onload = init;
-    </script>
-</body>
-</html>
+            box-shadow: 0 6px
