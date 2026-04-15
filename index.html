@@ -10,7 +10,7 @@
 
         /* ====== 字體大小統一設定 ====== */
         html, body, div, span, h1, h2, h3, p, button, input {
-            font-size: 1.2rem !important; /* 強制所有元素使用 1.2rem (約 19.2px) */
+            font-size: 1.2rem !important; 
             line-height: 1.6 !important;
         }
 
@@ -43,7 +43,7 @@
         .selectable-text {
             user-select: text !important;
             -webkit-user-select: text !important;
-            line-height: 2.2 !important; /* 文章保持較寬的行距方便閱讀 */
+            line-height: 2.2 !important; 
             color: #2d2d2d;
         }
 
@@ -123,14 +123,6 @@
             border-left: 4px solid #d97706;
             margin-bottom: 0.5rem;
         }
-
-        .summary-box {
-            background: #ffffff;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            text-align: left;
-        }
     </style>
 </head>
 <body class="p-3 md:p-4 gap-3 md:gap-4">
@@ -174,31 +166,33 @@
         </div>
 
         <div class="flex-[2.8] flex flex-col gap-3 min-h-[70vh] md:min-h-0 md:overflow-hidden">
-            <div class="cardboard-panel flex-1 rounded-2xl p-4 flex flex-col shadow-inner md:overflow-hidden min-h-0">
-                <div id="hint-container" class="hidden bg-white/80 border border-amber-200 p-2 rounded text-amber-800 mb-2 font-bold"></div>
+            
+            <div class="cardboard-panel flex-none h-[50vh] md:h-[55%] rounded-2xl p-4 flex flex-col shadow-inner overflow-hidden">
+                <div id="hint-container" class="hidden bg-white/80 border border-amber-200 p-2 rounded text-amber-800 mb-2 font-bold flex-none"></div>
                 
-                <div id="synth-container" class="bg-white/95 p-4 rounded-xl border-2 border-amber-200 shadow-sm flex-1 flex flex-col md:overflow-hidden min-h-0">
+                <div id="synth-container" class="bg-white/95 p-4 rounded-xl border-2 border-amber-200 shadow-sm flex-1 flex flex-col overflow-hidden">
                     <div id="task-info" class="flex-none">
                         <span id="task-stage" class="font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">初始化中...</span>
                         <p id="task-desc" class="text-stone-800 font-bold mt-2"></p>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto mt-2 pr-1">
-                        <div id="cloze-area" class="hidden border-t-2 border-dashed border-amber-100 pt-3 mb-3">
+                    <div class="flex-1 overflow-y-auto mt-2 pr-1 flex flex-col">
+                        <div id="cloze-area" class="hidden border-t-2 border-dashed border-amber-100 pt-3 mb-2 flex-none">
                             <div id="cloze-sentence" class="text-stone-800 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100"></div>
                         </div>
-                        <div id="target-points" class="space-y-2"></div>
+                        <div id="target-points" class="space-y-2 mt-auto pt-4 w-full"></div>
                     </div>
                 </div>
 
-                <div id="feedback-area" class="text-center font-bold mt-1"></div>
-                <button id="synth-btn" class="mt-1 flex-none w-full py-3 bg-stone-300 text-stone-400 rounded-xl font-black shadow-sm" disabled>等待證據</button>
+                <div id="feedback-area" class="text-center font-bold mt-1 flex-none"></div>
+                <button id="synth-btn" class="mt-1 flex-none w-full py-3 bg-stone-300 text-stone-500 rounded-xl font-black shadow-sm" disabled>等待證據</button>
             </div>
 
-            <div class="h-48 md:h-40 flex-none bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-2xl p-3 flex flex-col overflow-hidden">
+            <div class="flex-1 bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-2xl p-3 flex flex-col overflow-hidden min-h-[30vh] md:min-h-0">
                 <h3 class="text-amber-800 font-bold mb-2 text-center flex-none">📥 證據紀錄</h3>
-                <div id="evidence-basket" class="flex-1 overflow-y-auto"></div>
+                <div id="evidence-basket" class="flex-1 overflow-y-auto pr-1"></div>
             </div>
+
         </div>
     </div>
 
@@ -237,7 +231,6 @@
             "❽ 我希望有聰明智慧的中國人，懸崖勒馬，改弦更張，再也不製造那一種大而無當的商品包裝和那種金碧輝煌的商品鐵盒，給我們的子孫後代多留下一點大自然的資源。"
         ];
 
-        // 根據要求更新的題目與解答
         const gameFlow = [
             {
                 step: 1,
@@ -299,12 +292,10 @@
             if (collectedInStep >= flow.evidences.length) return;
             if (!selectedText) { showFeedback("⚠️ 請先在左側文中選取文字", "text-red-500"); return; }
 
-            // 清除標點符號與數字以利比對
             const cleanText = (s) => s.replace(/[\s\r\n\t\(\)\d\.,，。：「」『』!！?？❶-❽]/g, "");
             const cleanedSelection = cleanText(selectedText);
             const target = flow.evidences[collectedInStep];
 
-            // 尋找最符合的關鍵字
             let matchedKeyword = null;
             const isCorrect = target.keywords.some(k => {
                 const cleanedK = cleanText(k);
@@ -315,7 +306,6 @@
                 return false;
             });
 
-            // 動態字數限制：選取的字數，不能比「正確答案」多出超過 5 個字（防止直接選整段）
             if (isCorrect && matchedKeyword && cleanedSelection.length > matchedKeyword.length + 5) {
                 showFeedback("⚠️ 選取的範圍太長了！請去蕪存菁，只選關鍵字句。", "text-amber-600");
                 return;
@@ -403,7 +393,8 @@
         function finalizeStep() {
             const f = gameFlow[currentStepIdx];
             const p = document.createElement('div');
-            p.className = "p-2 bg-white border-l-4 border-amber-600 font-bold shadow-sm mb-2";
+            // 新增的小橫幅樣式
+            p.className = "p-2 bg-amber-50 border-2 border-amber-600 text-amber-900 rounded font-black shadow-sm w-full";
             p.innerText = "📍 " + f.synthesis;
             document.getElementById('target-points').appendChild(p);
             currentStepIdx++;
