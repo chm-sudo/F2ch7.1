@@ -13,6 +13,7 @@
         .left-panel { flex: 1.2; display: flex; flex-direction: column; position: relative; background: white; border-radius: 15px; border: 1px solid #ddd; overflow: hidden; }
         .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; }
         .selectable-text { padding: 20px; line-height: 2 !important; font-size: 1.2rem; user-select: text !important; -webkit-user-select: text !important; }
+        
         #verify-btn { 
             position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
             width: 90px; height: 90px; background: #d97706; color: white;
@@ -21,10 +22,19 @@
             cursor: pointer; user-select: none; -webkit-user-select: none;
         }
         #verify-btn:active { background: #b45309; transform: translateX(-50%) scale(0.95); }
+        
         .cardboard-panel { background-color: #f5e6d3; border: 2px solid #d4b483; border-radius: 15px; padding: 12px; display: flex; flex-direction: column; }
         .drop-slot { display: inline-flex; border: 2px solid #d97706; padding: 2px 8px; margin: 2px; border-radius: 6px; background: white; color: #b45309; font-weight: bold; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 11000; backdrop-filter: blur(4px); }
         #mc-popover { position: fixed; display: none; background: white; border: 2px solid #d97706; border-radius: 10px; z-index: 10000; flex-direction: column; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        
+        /* 視覺隔離：確保分論點與下一題隔開 */
+        .synthesis-point {
+            margin-top: 25px !important;
+            margin-bottom: 10px !important;
+            padding-top: 15px;
+            border-top: 2px dashed #d97706;
+        }
     </style>
 </head>
 <body>
@@ -54,7 +64,7 @@
                             <div id="cloze-area" class="hidden bg-amber-50 p-3 rounded-lg mb-2">
                                 <div id="cloze-sentence" class="font-bold text-stone-800"></div>
                             </div>
-                            <div id="target-points" class="space-y-2"></div>
+                            <div id="target-points"></div>
                         </div>
                     </div>
                     <div id="feedback-area" class="text-center h-6 text-sm font-bold mt-1"></div>
@@ -69,20 +79,20 @@
     </div>
 
     <div id="name-modal" class="modal-overlay">
-        <div class="bg-white p-6 rounded-2xl w-80 text-center">
-            <h2 class="font-black mb-4">解密成功！</h2>
-            <input type="text" id="user-class" placeholder="班別" class="w-full p-2 mb-2 border rounded">
-            <input type="number" id="user-num" placeholder="班號" class="w-full p-2 mb-2 border rounded">
-            <input type="text" id="user-name" placeholder="姓名" class="w-full p-2 mb-4 border rounded">
+        <div class="bg-white p-6 rounded-2xl w-80 text-center shadow-2xl">
+            <h2 class="font-black mb-4 text-xl text-amber-900">任務完成！</h2>
+            <input type="text" id="user-class" placeholder="班別" class="w-full p-2 mb-2 border rounded font-bold">
+            <input type="number" id="user-num" placeholder="班號" class="w-full p-2 mb-2 border rounded font-bold">
+            <input type="text" id="user-name" placeholder="姓名" class="w-full p-2 mb-4 border rounded font-bold">
             <button id="final-submit-btn" class="w-full py-3 bg-amber-600 text-white rounded-lg font-bold">生成證書</button>
         </div>
     </div>
 
     <div id="finish-screen" class="modal-overlay">
-        <div class="bg-white p-6 rounded-3xl max-w-2xl w-full mx-4 text-center border-8 border-amber-600 shadow-2xl overflow-y-auto">
+        <div class="bg-white p-6 rounded-3xl max-w-2xl w-full mx-4 text-center border-8 border-amber-600 shadow-2xl overflow-y-auto max-h-[90vh]">
             <h2 class="text-2xl font-black text-amber-900 mb-4 italic">榮譽證書</h2>
             <p class="font-bold mb-4 text-lg"><span id="display-class"></span> 班 <span id="display-num"></span> 號 <span id="display-name"></span> 同學</p>
-            <div id="final-summary" class="text-left bg-stone-50 p-4 rounded-xl text-sm leading-relaxed border"></div>
+            <div id="final-summary" class="text-left bg-stone-50 p-4 rounded-xl text-sm leading-relaxed border space-y-3"></div>
             <button onclick="location.reload()" class="mt-6 font-bold text-stone-400 underline">重新挑戰</button>
         </div>
     </div>
@@ -104,21 +114,21 @@
                 { q: "1. 找出：周村燒餅原本的包裝方法", keywords: ["過去只是十個或八九個一摞，用白紙一包"], label: "舊有包裝" },
                 { q: "2. 找出：現今周村燒餅的包裝", keywords: ["鐵盒，彩繪燙金，光彩奪目"], label: "新裝" },
                 { q: "3. 找出：商品價值與包裝成本的對比", keywords: ["後者比前者要貴得多"], label: "價值倒置" }
-            ], cloze: "分論點：現代商品{過度包裝}，其成本{遠高於}商品價值，造成{浪費}。", mcOptions: { "過度包裝": ["簡單包裝", "過度包裝"], "遠高於": ["遠低於", "遠高於"], "浪費": ["節約", "浪費"] }, synthesis: "分論一：過度包裝造成價值失衡。" },
+            ], cloze: "分論點：現代商品{過度包裝}，其成本{遠高於}商品價值，造成{浪費}。", mcOptions: { "過度包裝": ["簡單包裝", "過度包裝"], "遠高於": ["遠低於", "遠高於"], "浪費": ["節約", "浪費"] }, synthesis: "分論一：現代商品過度包裝，其成本遠高於商品價值，造成浪費。" },
             
             { step: 2, evidences: [
                 { q: "4. 找出：古代處理垃圾的情況", keywords: ["沒有多少垃圾，也決不會自己製造垃圾"], label: "古代" },
                 { q: "5. 找出：現代處理垃圾的情況", keywords: ["每一個國家的政府都為處理垃圾而大傷腦筋"], label: "現代危機" }
-            ], cloze: "分論點：這會製造大量{垃圾}，演變成{全球性問題}。", mcOptions: { "垃圾": ["財富", "垃圾"], "全球性問題": ["個人問題", "全球性問題"] }, synthesis: "分論二：垃圾處理已成全球危機。" },
+            ], cloze: "分論點：這會製造大量{垃圾}，演變成{全球性問題}。", mcOptions: { "垃圾": ["財富", "垃圾"], "全球性問題": ["個人問題", "全球性問題"] }, synthesis: "分論二：今人過度包裝製造垃圾，最後演變成全球性問題。" },
             
             { step: 3, evidences: [
                 { q: "6. 找出：文中提及資源性質的描述", keywords: ["資源畢竟是有限的", "造物是有盡藏的"], label: "資源" }
-            ], cloze: "分論點：自然資源並非{不竭}，若人類繼續{浪費}，資源終會{耗盡}。", mcOptions: { "不竭": ["有限", "不竭"], "浪費": ["珍惜", "浪費"], "耗盡": ["再生", "耗盡"] }, synthesis: "分論三：自然資源並非取之不盡。" },
+            ], cloze: "分論點：自然資源並非{不竭}，若人類繼續{浪費}，資源終會{耗盡}。", mcOptions: { "不竭": ["不竭", "無限"], "浪費": ["節約", "浪費"], "耗盡": ["再生", "耗盡"] }, synthesis: "分論三：自然資源並非「不竭」與「無盡藏」的。" },
             
             { step: 4, evidences: [
                 { q: "7. 找出：作者對中國人的具體建議", keywords: ["再也不製造那一種大而無當的商品包裝"], label: "具體建議" },
                 { q: "8. 找出：全文開篇的核心感受", keywords: ["值得擔憂"], label: "核心論點" }
-            ], cloze: "中心論點：過度包裝問題{值得擔憂}。我們應{不再製造大而無當的包裝}。", mcOptions: { "值得擔憂": ["值得擔憂", "不足掛齒"], "不再製造大而無當的包裝": ["加強包裝", "不再製造大而無當的包裝"] }, synthesis: "中心論點：應停止過度包裝，保護資源。" }
+            ], cloze: "中心論點：過度包裝問題{值得擔憂}。我們應{不再製造大而無當的包裝}。", mcOptions: { "值得擔憂": ["值得擔憂", "不足掛齒"], "不再製造大而無當的包裝": ["加強包裝", "不再製造大而無當的包裝"] }, synthesis: "中心論點：商品過度包裝的問題。" }
         ];
 
         let currentStepIdx = 0, collectedInStep = 0, totalFail = 0;
@@ -151,11 +161,11 @@
             if (collectedInStep < flow.evidences.length) {
                 document.getElementById('task-stage').innerText = `搜集證據 (${collectedInStep}/${flow.evidences.length})`;
                 document.getElementById('task-desc').innerText = flow.evidences[collectedInStep].q;
-                btn.disabled = true; btn.className = "w-full py-3 mt-2 rounded-xl bg-stone-300 text-stone-500";
+                btn.disabled = true; btn.className = "w-full py-3 mt-2 rounded-xl bg-stone-300 text-stone-500 font-bold";
             } else {
                 document.getElementById('task-stage').innerText = "證據齊全";
                 document.getElementById('task-desc').innerText = "點擊按鈕合成邏輯";
-                btn.disabled = false; btn.className = "w-full py-3 mt-2 rounded-xl bg-amber-600 text-white shadow-lg cursor-pointer";
+                btn.disabled = false; btn.className = "w-full py-3 mt-2 rounded-xl bg-amber-600 text-white shadow-lg cursor-pointer font-bold";
                 btn.onclick = startCloze;
             }
         }
@@ -178,23 +188,32 @@
 
         function verifyCloze() {
             if (Array.from(document.querySelectorAll('.drop-slot')).every(s => s.innerText === s.dataset.answer)) {
-                const f = document.createElement('div'); f.className = "p-2 bg-white border border-amber-600 text-amber-900 rounded font-bold text-xs";
+                const f = document.createElement('div'); 
+                f.className = "p-2 bg-white border border-amber-600 text-amber-900 rounded font-bold text-xs synthesis-point";
                 f.innerText = "📍 " + gameFlow[currentStepIdx].synthesis;
                 document.getElementById('target-points').appendChild(f);
+                
                 currentStepIdx++; collectedInStep = 0;
-                if (currentStepIdx < gameFlow.length) { document.getElementById('cloze-area').classList.add('hidden'); updateTask(); document.getElementById('synth-btn').innerText = "等待證據"; }
+                if (currentStepIdx < gameFlow.length) { 
+                    document.getElementById('cloze-area').classList.add('hidden'); 
+                    updateTask(); 
+                    document.getElementById('synth-btn').innerText = "等待證據"; 
+                }
                 else { showFinal(); }
             } else { totalFail++; showFeedback("✗ 邏輯推理錯誤", "text-red-500"); }
         }
 
         function showFinal() {
+            // 嚴格鎖定教學總結
             document.getElementById('final-summary').innerHTML = `
-                <p class="font-black text-center text-amber-800 border-b pb-2 mb-3 text-lg">📝 《再論包裝》學習總結</p>
-                <div class="mb-3"><b>● 中心論點：</b>商品過度包裝的問題。</div>
-                <div class="mb-3"><b>● 分論一：</b>包裝成本遠高於商品價值，造成浪費。</div>
-                <div class="mb-3"><b>● 分論二：</b>過度包裝製造垃圾，演變成全球性問題。</div>
-                <div class="mb-3"><b>● 分論三：</b>自然資源並非不竭，若繼續浪費終會耗盡。</div>
-                <p class="font-black text-amber-700 mt-4 text-center text-base">● 結論：應改弦更張，不再製造大而無當的包裝，保護後代資源。</p>
+                <p class="font-black text-center text-amber-800 border-b pb-2 mb-3 text-lg">📝 《再論包裝》結構總結</p>
+                <div><b>● 中心論點：</b>商品過度包裝的問題</div>
+                <div><b>● 分論一：</b>現代商品過度包裝，商品的包裝成本遠高於商品實際價值，造成浪費。</div>
+                <div class="pl-4 text-stone-600 text-xs italic">論據：舉出現今周村燒餅以彩繪燙金的鐵盒包裝作例子、商品（燒餅）本身的價值不高，但包裝（鐵盒）的成本卻比商品價值高昂得多。</div>
+                <div><b>● 分論二：</b>今人過度包裝製造垃圾，最後演變成全球性問題。</div>
+                <div class="pl-4 text-stone-600 text-xs italic">論據：古代人生活簡樸，沒有多少垃圾；現代人製造過多垃圾，每一個國家都為處理垃圾大傷腦筋。</div>
+                <div><b>● 分論三：</b>指出自然資源並非「不竭」與「無盡藏」的，若人類繼續浪費，自然資源終有一天會耗盡。</div>
+                <p class="font-black text-amber-700 mt-4 text-center text-base">結論：聰明的中國人應該懸崖勒馬、改弦更張，給子孫多留一點資源。</p>
             `;
             document.getElementById('name-modal').style.display = 'flex';
         }
@@ -204,7 +223,7 @@
         window.onload = () => {
             document.getElementById('text-canvas').innerHTML = articleText.map(t => `<p class="mb-4">${t}</p>`).join('');
             document.getElementById('final-submit-btn').onclick = () => {
-                if(!document.getElementById('user-name').value) return alert("請填寫姓名以生成證書");
+                if(!document.getElementById('user-name').value) return alert("請填寫姓名");
                 document.getElementById('display-class').innerText = document.getElementById('user-class').value;
                 document.getElementById('display-num').innerText = document.getElementById('user-num').value;
                 document.getElementById('display-name').innerText = document.getElementById('user-name').value;
