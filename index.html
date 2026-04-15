@@ -8,6 +8,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap');
 
+        /* ====== 字體大小統一設定 ====== */
+        html, body, div, span, h1, h2, h3, p, button, input {
+            font-size: 1.2rem !important; /* 強制所有元素使用 1.2rem (約 19.2px) */
+            line-height: 1.6 !important;
+        }
+
         body {
             background-color: #fdf6ec;
             background-image: url('https://www.transparenttextures.com/patterns/cardboard-flat.png');
@@ -37,8 +43,7 @@
         .selectable-text {
             user-select: text !important;
             -webkit-user-select: text !important;
-            line-height: 2.2;
-            font-size: 1.2rem;
+            line-height: 2.2 !important; /* 文章保持較寬的行距方便閱讀 */
             color: #2d2d2d;
         }
 
@@ -51,11 +56,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 90px;
-            height: 36px;
+            min-width: 120px;
+            padding: 4px 8px;
             border: 2px solid #d97706;
             background: #fff;
-            margin: 0 4px;
+            margin: 4px;
             vertical-align: middle;
             border-radius: 6px;
             cursor: pointer;
@@ -97,8 +102,8 @@
         }
 
         #verify-btn {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             background: #d97706;
             color: white;
             border-radius: 9999px;
@@ -116,7 +121,7 @@
             padding: 0.75rem;
             border-radius: 0.5rem;
             border-left: 4px solid #d97706;
-            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .summary-box {
@@ -134,15 +139,15 @@
 
     <div class="flex justify-between items-center bg-white border-b-4 border-amber-600 p-3 rounded-xl shadow-md flex-none">
         <div class="flex items-center gap-2">
-            <span class="text-xl">🔍</span>
+            <span>🔍</span>
             <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
-                <h1 class="text-amber-900 font-black text-base md:text-lg">邏輯獵手：證據追蹤</h1>
-                <span class="text-stone-500 text-[10px] md:text-sm font-bold">——《一個值得擔憂的現象——再論包裝》</span>
+                <h1 class="text-amber-900 font-black">邏輯獵手：證據追蹤</h1>
+                <span class="text-stone-500 font-bold">——《再論包裝》</span>
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <div class="text-xs font-bold text-stone-500">錯誤：<span id="fail-counter" class="text-red-600">0</span></div>
-            <div id="progress-val" class="text-lg font-black text-amber-900">1 / 4</div>
+            <div class="font-bold text-stone-500">錯誤：<span id="fail-counter" class="text-red-600">0</span></div>
+            <div id="progress-val" class="font-black text-amber-900">1 / 4</div>
         </div>
     </div>
 
@@ -152,8 +157,8 @@
             <div id="scroll-area" class="paper-sheet flex-1 rounded-2xl p-5 md:p-6 overflow-y-auto">
                 <div class="mb-4 flex flex-col gap-2">
                     <div class="flex items-center gap-2">
-                        <span class="bg-amber-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">任務目標</span>
-                        <span class="text-xs text-amber-800 font-bold">請選取文中對應的證據文字（限 5 字以內）</span>
+                        <span class="bg-amber-600 text-white px-2 py-0.5 rounded font-bold">任務目標</span>
+                        <span class="text-amber-800 font-bold">請選取文中對應的證據文字（勿選取過長）</span>
                     </div>
                 </div>
                 <div id="text-canvas" class="selectable-text font-serif"></div>
@@ -162,61 +167,61 @@
 
             <div id="verify-container">
                 <button id="verify-btn" type="button">
-                    <span class="text-2xl">✔️</span>
-                    <span class="text-xs font-black uppercase">驗證</span>
+                    <span>✔️</span>
+                    <span class="font-black uppercase">驗證</span>
                 </button>
             </div>
         </div>
 
         <div class="flex-[2.8] flex flex-col gap-3 min-h-[70vh] md:min-h-0 md:overflow-hidden">
             <div class="cardboard-panel flex-1 rounded-2xl p-4 flex flex-col shadow-inner md:overflow-hidden min-h-0">
-                <div id="hint-container" class="hidden bg-white/80 border border-amber-200 p-2 rounded text-amber-800 text-[11px] mb-2"></div>
+                <div id="hint-container" class="hidden bg-white/80 border border-amber-200 p-2 rounded text-amber-800 mb-2 font-bold"></div>
                 
                 <div id="synth-container" class="bg-white/95 p-4 rounded-xl border-2 border-amber-200 shadow-sm flex-1 flex flex-col md:overflow-hidden min-h-0">
                     <div id="task-info" class="flex-none">
-                        <span id="task-stage" class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">初始化中...</span>
-                        <p id="task-desc" class="text-stone-800 font-bold leading-tight text-base mt-2"></p>
+                        <span id="task-stage" class="font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">初始化中...</span>
+                        <p id="task-desc" class="text-stone-800 font-bold mt-2"></p>
                     </div>
                     
                     <div class="flex-1 overflow-y-auto mt-2 pr-1">
                         <div id="cloze-area" class="hidden border-t-2 border-dashed border-amber-100 pt-3 mb-3">
-                            <div id="cloze-sentence" class="text-stone-800 leading-relaxed text-base font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100"></div>
+                            <div id="cloze-sentence" class="text-stone-800 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100"></div>
                         </div>
                         <div id="target-points" class="space-y-2"></div>
                     </div>
                 </div>
 
-                <div id="feedback-area" class="h-5 text-center text-[10px] font-bold mt-1"></div>
-                <button id="synth-btn" class="mt-1 flex-none w-full py-3 bg-stone-300 text-stone-400 rounded-xl font-black text-base shadow-sm" disabled>等待證據</button>
+                <div id="feedback-area" class="text-center font-bold mt-1"></div>
+                <button id="synth-btn" class="mt-1 flex-none w-full py-3 bg-stone-300 text-stone-400 rounded-xl font-black shadow-sm" disabled>等待證據</button>
             </div>
 
-            <div class="h-40 md:h-32 flex-none bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-2xl p-3 flex flex-col overflow-hidden">
-                <h3 class="text-amber-800 font-bold text-[10px] mb-2 text-center flex-none">📥 證據紀錄</h3>
-                <div id="evidence-basket" class="flex-1 overflow-y-auto space-y-2 text-[10px]"></div>
+            <div class="h-48 md:h-40 flex-none bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-2xl p-3 flex flex-col overflow-hidden">
+                <h3 class="text-amber-800 font-bold mb-2 text-center flex-none">📥 證據紀錄</h3>
+                <div id="evidence-basket" class="flex-1 overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
     <div id="name-modal" class="modal-overlay">
         <div class="bg-white p-6 rounded-3xl shadow-2xl border-4 border-amber-600 max-w-sm w-full mx-4">
-            <h2 class="text-xl font-black text-amber-900 mb-4 text-center">任務完成！</h2>
+            <h2 class="font-black text-amber-900 mb-4 text-center">任務完成！</h2>
             <div class="space-y-3">
-                <input type="text" id="user-class" placeholder="請輸入班別 (如 4A)" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold text-sm">
-                <input type="text" id="user-name" placeholder="請輸入姓名" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold text-sm">
-                <button id="final-submit-btn" class="w-full py-4 bg-amber-600 text-white rounded-xl font-black text-lg shadow-lg">提交並領取證書</button>
+                <input type="text" id="user-class" placeholder="請輸入班別 (如 4A)" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
+                <input type="text" id="user-name" placeholder="請輸入姓名" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
+                <button id="final-submit-btn" class="w-full py-4 bg-amber-600 text-white rounded-xl font-black shadow-lg">提交並領取證書</button>
             </div>
         </div>
     </div>
 
     <div id="finish-screen" class="modal-overlay overflow-y-auto py-10">
         <div class="bg-white p-6 rounded-3xl text-center border-8 border-double border-amber-600 max-w-2xl w-full mx-auto my-auto shadow-2xl">
-            <h2 class="text-3xl font-black text-amber-900 mb-2">榮譽證書</h2>
-            <p class="text-lg mb-4"><span id="display-class" class="font-bold text-amber-700"></span> <span id="display-name" class="font-bold text-amber-700"></span> 同學：</p>
+            <h2 class="font-black text-amber-900 mb-2">榮譽證書</h2>
+            <p class="mb-4"><span id="display-class" class="font-bold text-amber-700"></span> <span id="display-name" class="font-bold text-amber-700"></span> 同學：</p>
             <div class="bg-amber-100 p-4 rounded-xl mb-6 inline-block px-10">
-                <p class="text-xs text-amber-800 font-bold mb-1">獲得稱號</p>
-                <h3 id="display-title" class="text-2xl font-black text-amber-900"></h3>
+                <p class="text-amber-800 font-bold mb-1">獲得稱號</p>
+                <h3 id="display-title" class="font-black text-amber-900"></h3>
             </div>
-            <button onclick="location.reload()" class="block w-full text-stone-400 font-bold text-sm mt-4">重新開始</button>
+            <button onclick="location.reload()" class="block w-full text-stone-400 font-bold mt-4">重新開始</button>
         </div>
     </div>
 
@@ -226,19 +231,20 @@
             "❷ 我曾在本刊上寫過一篇《論包裝》的文章，內容主要是談外面包裝極大而裡面的商品極小的問題。現在這一篇《再論包裝》，主要談的是外面包裝和裡面商品價值的問題。重點有所不同，而令人擔憂則一也。我先舉一個小例子。",
             "❸ 最近有友人從山東歸來，帶給我一些周村燒餅，是當地生產的一種點心。作料異常簡單，不過一點麵粉、芝麻，再加上一點糖或鹽，用水和好，擀成薄皮，做成圓餅，放在爐中烤乾，即為成品，香脆可口，遠近聞名，大概有幾百年的歷史了。因為成本極低，所以價錢不高。過去只是十個或八九個一摞，用白紙一包，即可出售。燒餅吃完，把紙一揉，變成垃圾，佔地也不多。",
             "❹ 常言道：「士別三日，當刮目相看。」豈知這一句話也能應用到周村燒餅身上。現在友人送給我的這些燒餅，完全換了新裝，不是白紙，而是鐵盒，彩繪燙金，光彩奪目。夥頤！我的老朋友闊起來了！我不禁大為驚詫。",
-            "❺ 在驚詫之餘，我又不禁憂心忡忡起來。我不是經濟學家，這裡也用不著經濟學。只草約地估算一下，那幾個燒餅能值幾個錢？這金碧輝煌的鐵盒值多少錢？顯然後者比前者要貴得多。可是哪一個有使用價值呢？又顯然是前者。燒餅吃下去，可以充飢，可以轉變成營養成分，增強人的身體。鐵盒，如果只有一、兩個的話，小孩可以拿著玩一玩。如果是成千上萬的話，卻只能變成垃圾，遭人遺棄。《論包裝》中提到的那一些大而無當的包裝，把其中小小的一點商品取出來後，也都成為垃圾。",
+            "❺ 在驚詫之餘，我又不禁憂心忡忡起來。我不是經濟學家，這裡也用不著經濟學。只草草地估算一下，那幾個燒餅能值幾個錢？這金碧輝煌的鐵盒值多少錢？顯然後者比前者要貴得多。可是哪一個有使用價值呢？又顯然是前者。燒餅吃下去，可以充飢，可以轉變成營養成分，增強人的身體。鐵盒，如果只有一、兩個的話，小孩可以拿著玩一玩。如果是成千上萬的話，卻只能變成垃圾，遭人遺棄。《論包裝》中提到的那一些大而無當的包裝，把其中小小的一點商品取出來後，也都成為垃圾。",
             "❻ 這有點像中國古書上的一個典故：「買櫝還珠。」但是，這個典故不過是譏笑捨本逐末，取捨不當而已，那個櫝還是有用的，決不會變成垃圾。古代人生活簡樸，沒有多少垃圾，也決不會自己製造垃圾。到了今天，人類大大地進步了。卻愈來愈蠢了，會自己製造垃圾，以致垃圾成為一個世界性問題。每一個國家的政府都為處理垃圾而大傷腦筋，至今還沒能找到一個行之有效的辦法。如此持續下去，將來人類只能在垃圾堆裏討生活了。",
             "❼ 但是，還有更嚴重的問題。人類衣、食、住、行的資料都取之於大自然。但是，小小的一個地球村裏資源畢竟是有限的。當年蘇東坡說：「惟江上之清風，與山間之明月，耳得之而為聲，目遇之而成色，取之無禁，用之不竭，是造物之無盡藏也。」東坡認為造物無盡藏，是不正確的。造物是有盡藏的，用之是有竭的。可惜到了今天，世人還多是渾渾噩噩，懵懵懂懂，毫無反思悔改之意。尤其是那一個以世界警察自居的大國，在使用大自然資源方面，肆無忌憚地浪費，真不禁令人髮指。有識之士已經感覺到，人類已經是「盲人騎瞎馬，夜半臨深池」，但感覺到這種危險者不多。這是事實，並不是我一個人的杞憂。",
             "❽ 我希望有聰明智慧的中國人，懸崖勒馬，改弦更張，再也不製造那一種大而無當的商品包裝和那種金碧輝煌的商品鐵盒，給我們的子孫後代多留下一點大自然的資源。"
         ];
 
+        // 根據要求更新的題目與解答
         const gameFlow = [
             {
                 step: 1,
                 evidences: [
-                    { q: "1. 找出：周村燒餅原本的包裝方法", keywords: ["過去", "白紙一包"], label: "舊有包裝", hint: "第 ❸ 段：白紙。" },
-                    { q: "2. 找出：現今周村燒餅的包裝", keywords: ["現在", "鐵盒", "彩繪燙金"], label: "新式包裝", hint: "第 ❹ 段：鐵盒。" },
-                    { q: "3. 找出：商品價值與包裝成本的對比", keywords: ["後者比前者要貴"], label: "價值倒置", hint: "第 ❺ 段：後者更貴。" }
+                    { q: "1. 找出：周村燒餅原本的包裝方法", keywords: ["過去只是十個或八九個一摞，用白紙一包"], label: "舊有包裝", hint: "第 ❸ 段" },
+                    { q: "2. 找出：現今周村燒餅的包裝", keywords: ["鐵盒，彩繪燙金，光彩奪目"], label: "新式包裝", hint: "第 ❹ 段" },
+                    { q: "3. 找出：商品價值與包裝成本的對比", keywords: ["後者比前者要貴"], label: "價值倒置", hint: "第 ❺ 段：找出「比」字" }
                 ],
                 cloze: "分論點：現代商品{過度包裝}，其成本{遠高於}商品價值，造成{浪費}。",
                 mcOptions: { "過度包裝": ["簡單包裝", "過度包裝"], "遠高於": ["遠低於", "遠高於"], "浪費": ["節約", "浪費"] },
@@ -247,7 +253,8 @@
             {
                 step: 2,
                 evidences: [
-                    { q: "4. 找出：古今處理垃圾情況的對比", keywords: ["古代人", "簡樸", "大傷腦筋"], label: "環境問題", hint: "第 ❻ 段：大傷腦筋。" }
+                    { q: "4. 找出：古代處理垃圾的情況", keywords: ["沒有多少垃圾，也決不會自己製造垃圾"], label: "古代環境", hint: "第 ❻ 段" },
+                    { q: "5. 找出：現代處理垃圾的情況", keywords: ["每一個國家的政府都為處理垃圾而大傷腦筋"], label: "現代問題", hint: "國家的政府的問題" }
                 ],
                 cloze: "分論點：這會製造大量{垃圾}，演變成{全球性問題}。",
                 mcOptions: { "垃圾": ["財富", "垃圾"], "全球性問題": ["個人問題", "全球性問題"] },
@@ -256,7 +263,7 @@
             {
                 step: 3,
                 evidences: [
-                    { q: "5. 找出：文中提及資源性質的描述", keywords: ["無盡藏", "不正確", "有竭"], label: "資源危機", hint: "第 ❼ 段：有竭。" }
+                    { q: "6. 找出：文中提及資源性質的描述", keywords: ["資源畢竟是有限的", "造物是有盡藏的，用之是有竭的"], label: "資源危機", hint: "第 ❼ 段：找出「資源」一詞。" }
                 ],
                 cloze: "分論點：自然資源並非{不竭}，若人類繼續{浪費}，資源終會{耗盡}。",
                 mcOptions: { "不竭": ["有限", "不竭"], "浪費": ["珍惜", "浪費"], "耗盡": ["再生", "耗盡"] },
@@ -265,8 +272,8 @@
             {
                 step: 4,
                 evidences: [
-                    { q: "6. 找出：作者對中國人的具體建議", keywords: ["懸崖勒馬", "改弦更張", "再也不製造那一種大而無當的商品包裝"], label: "行動建議", hint: "第 ❽ 段：改弦更張。" },
-                    { q: "7. 找出：全文開篇的核心感受", keywords: ["值得擔憂"], label: "核心論點", hint: "第 ❶ 段：值得擔憂。" }
+                    { q: "7. 找出：作者對中國人的具體建議", keywords: ["懸崖勒馬", "改弦更張", "再也不製造那一種大而無當的商品包裝"], label: "行動建議", hint: "第 ❽ 段：改弦更張。" },
+                    { q: "8. 找出：全文開篇的核心感受", keywords: ["值得擔憂"], label: "核心論點", hint: "第 ❶ 段：值得擔憂。" }
                 ],
                 cloze: "中心論點：過度包裝問題{值得擔憂}。我們應{不再製造大而無當的包裝}。",
                 mcOptions: { "值得擔憂": ["值得擔憂", "不足掛齒"], "不再製造大而無當的包裝": ["加強包裝", "不再製造大而無當的包裝"] },
@@ -292,18 +299,27 @@
             if (collectedInStep >= flow.evidences.length) return;
             if (!selectedText) { showFeedback("⚠️ 請先在左側文中選取文字", "text-red-500"); return; }
 
-            // 新增限制：選取字數不能超過 5 個字
+            // 清除標點符號與數字以利比對
             const cleanText = (s) => s.replace(/[\s\r\n\t\(\)\d\.,，。：「」『』!！?？❶-❽]/g, "");
             const cleanedSelection = cleanText(selectedText);
+            const target = flow.evidences[collectedInStep];
 
-            if (cleanedSelection.length > 5) {
-                showFeedback("⚠️ 太長了！請更精準地選取關鍵詞（不超過 5 字）", "text-amber-600");
+            // 尋找最符合的關鍵字
+            let matchedKeyword = null;
+            const isCorrect = target.keywords.some(k => {
+                const cleanedK = cleanText(k);
+                if (cleanedSelection.includes(cleanedK) || cleanedK.includes(cleanedSelection)) {
+                    matchedKeyword = cleanedK;
+                    return true;
+                }
+                return false;
+            });
+
+            // 動態字數限制：選取的字數，不能比「正確答案」多出超過 5 個字（防止直接選整段）
+            if (isCorrect && matchedKeyword && cleanedSelection.length > matchedKeyword.length + 5) {
+                showFeedback("⚠️ 選取的範圍太長了！請去蕪存菁，只選關鍵字句。", "text-amber-600");
                 return;
             }
-
-            const target = flow.evidences[collectedInStep];
-            // 只要選取的文字中包含任何一個關鍵字片段即可（且符合字數限制）
-            const isCorrect = target.keywords.some(k => cleanedSelection.includes(cleanText(k)) || cleanText(k).includes(cleanedSelection));
 
             if (isCorrect && cleanedSelection.length >= 2) {
                 addEvidence(target.label, selectedText);
@@ -324,7 +340,7 @@
 
         function addEvidence(label, text) {
             const div = document.createElement('div');
-            div.className = "evidence-item";
+            div.className = "evidence-item bg-white p-2 rounded border-l-4 border-amber-600 shadow-sm mb-2";
             div.innerHTML = `<b>【${label}】</b> ${text}`;
             document.getElementById('evidence-basket').prepend(div);
         }
@@ -337,7 +353,7 @@
                 document.getElementById('task-stage').innerText = `提取中 (${collectedInStep}/${flow.evidences.length})`;
                 document.getElementById('task-desc').innerText = flow.evidences[collectedInStep].q;
                 btn.disabled = true;
-                btn.className = "mt-1 w-full py-3 bg-stone-300 text-stone-400 rounded-xl font-black";
+                btn.className = "mt-1 w-full py-3 bg-stone-300 text-stone-500 rounded-xl font-black";
             } else {
                 document.getElementById('task-stage').innerText = "證據備齊";
                 document.getElementById('task-desc').innerText = "點擊下方按鈕開始邏輯合成！";
@@ -365,7 +381,7 @@
             const opts = gameFlow[currentStepIdx].mcOptions[slot.dataset.answer];
             opts.forEach(opt => {
                 const div = document.createElement('div');
-                div.className = "p-3 border-b last:border-0 hover:bg-amber-100 cursor-pointer text-sm font-bold";
+                div.className = "p-3 border-b last:border-0 hover:bg-amber-100 cursor-pointer font-bold";
                 div.innerText = opt;
                 div.onclick = (e) => { e.stopPropagation(); slot.innerText = opt; popover.style.display = 'none'; };
                 popover.appendChild(div);
@@ -387,7 +403,7 @@
         function finalizeStep() {
             const f = gameFlow[currentStepIdx];
             const p = document.createElement('div');
-            p.className = "p-2 bg-white border-l-4 border-amber-600 text-xs font-bold shadow-sm mb-2";
+            p.className = "p-2 bg-white border-l-4 border-amber-600 font-bold shadow-sm mb-2";
             p.innerText = "📍 " + f.synthesis;
             document.getElementById('target-points').appendChild(p);
             currentStepIdx++;
@@ -413,7 +429,7 @@
         function showFeedback(m, c) {
             const el = document.getElementById('feedback-area');
             el.innerText = m;
-            el.className = "h-5 text-center text-[10px] font-bold " + c;
+            el.className = "text-center font-bold mb-2 " + c;
         }
 
         window.onclick = () => document.getElementById('mc-popover').style.display = 'none';
