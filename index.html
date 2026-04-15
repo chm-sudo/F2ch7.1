@@ -15,7 +15,6 @@
             background-color: #fdf6ec;
             background-image: url('https://www.transparenttextures.com/patterns/cardboard-flat.png');
             font-family: 'Noto Sans TC', sans-serif;
-            touch-action: manipulation; /* 優化觸控響應 */
         }
 
         .game-container {
@@ -84,7 +83,6 @@
             font-size: 0.85rem;
         }
 
-        /* 終極優化：驗證按鈕 */
         #verify-btn {
             position: absolute;
             bottom: 25px;
@@ -97,7 +95,7 @@
             border-radius: 50%;
             border: 4px solid white;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            z-index: 9999; /* 確保在最頂層 */
+            z-index: 1000;
             font-weight: 900;
             display: flex;
             align-items: center;
@@ -107,10 +105,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        #verify-btn:active {
-            background: #b45309;
-            transform: translateX(-50%) scale(0.95);
-        }
+        #verify-btn:active { background: #b45309; transform: translateX(-50%) scale(0.95); }
 
         .drop-slot {
             display: inline-flex;
@@ -121,6 +116,7 @@
             background: white;
             color: #b45309;
             font-weight: bold;
+            cursor: pointer;
         }
 
         #mc-popover {
@@ -154,6 +150,8 @@
             max-height: 50vh;
             overflow-y: auto;
         }
+
+        .instruction-tip { font-size: 0.8rem !important; color: #92400e; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -182,8 +180,8 @@
                 <div class="cardboard-panel flex-1 overflow-hidden">
                     <div class="bg-white/90 p-3 rounded-lg flex-1 flex flex-col overflow-hidden">
                         <div class="mb-2">
-                            <span id="task-stage" class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold">任務載入中...</span>
-                            <div class="text-[10px] text-amber-700 mt-1">(長按文字並拖動圓點選取，再點驗證)</div>
+                            <span id="task-stage" class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold">搜集證據 (0/3)</span>
+                            <div class="instruction-tip">(長按篇章中的文字後，拖動兩端小圓點進行選取，再點選“驗證”)</div>
                             <p id="task-desc" class="font-black text-stone-900 mt-2 text-base"></p>
                         </div>
                         <div class="flex-1 overflow-y-auto border-t pt-2">
@@ -207,8 +205,8 @@
 
     <div id="name-modal" class="modal-overlay">
         <div class="bg-white p-6 rounded-2xl w-80 text-center">
-            <h2 class="font-black mb-4 text-amber-900">任務完成！</h2>
-            <input type="text" id="user-class" placeholder="班別" class="w-full p-2 mb-2 border rounded font-bold">
+            <h2 class="font-black mb-4 text-amber-900 text-xl">任務圓滿完成！</h2>
+            <input type="text" id="user-class" placeholder="班別 (例: 4A)" class="w-full p-2 mb-2 border rounded font-bold">
             <input type="number" id="user-num" placeholder="班號" class="w-full p-2 mb-2 border rounded font-bold">
             <input type="text" id="user-name" placeholder="姓名" class="w-full p-2 mb-4 border rounded font-bold">
             <button id="final-submit-btn" class="w-full py-3 bg-amber-600 text-white rounded-lg font-bold">生成榮譽證書</button>
@@ -217,7 +215,7 @@
 
     <div id="finish-screen" class="modal-overlay">
         <div class="bg-white p-6 rounded-3xl max-w-2xl w-full mx-4 text-center border-8 border-double border-amber-600 shadow-2xl overflow-y-auto">
-            <h2 class="text-3xl font-black text-amber-900 mb-2 italic">榮譽證書</h2>
+            <h2 class="text-3xl font-black text-amber-900 mb-2">榮譽證書</h2>
             <p class="font-bold mb-4 text-lg"><span id="display-class"></span> 班 <span id="display-num"></span> 號 <span id="display-name"></span> 同學：</p>
             <div class="summary-box shadow-inner border">
                 <p class="font-black text-center text-amber-800 border-b pb-2 mb-3 text-lg">📝 《再論包裝》學習總結</p>
@@ -252,18 +250,12 @@
 
         let currentStepIdx = 0, collectedInStep = 0, totalFail = 0;
 
-        const verifyBtn = document.getElementById('verify-btn');
-
         function init() {
             document.getElementById('text-canvas').innerHTML = articleText.map(t => `<p class="mb-4">${t}</p>`).join('');
             
-            // iPad 終極相容性點擊監聽
-            const clickHandler = (e) => {
-                e.preventDefault();
-                checkSelection();
-            };
-            verifyBtn.addEventListener('click', clickHandler);
-            verifyBtn.addEventListener('pointerdown', clickHandler);
+            // 綁定驗證按鈕
+            const verifyBtn = document.getElementById('verify-btn');
+            verifyBtn.onclick = checkSelection;
             
             document.getElementById('final-submit-btn').onclick = submitAndFinish;
             updateTask();
@@ -272,8 +264,9 @@
         function checkSelection() {
             const selection = window.getSelection();
             const rawText = selection.toString().trim();
+            
             if (!rawText || rawText.length < 2) { 
-                showFeedback("⚠️ 請先選取文字", "text-red-500"); 
+                showFeedback("⚠️ 請先在文中選取文字", "text-red-500"); 
                 return; 
             }
 
@@ -281,6 +274,7 @@
             const cleanedSel = clean(rawText);
             const target = gameFlow[currentStepIdx].evidences[collectedInStep];
             
+            // 核心判定邏輯
             const isCorrect = target.keywords.some(k => {
                 const ck = clean(k);
                 const hasKey = cleanedSel.includes(ck) || ck.includes(cleanedSel);
@@ -297,12 +291,12 @@
                 collectedInStep++;
                 showFeedback("✓ 正確！", "text-green-600");
                 document.getElementById('hint-container').classList.add('hidden');
-                selection.removeAllRanges();
+                selection.removeAllRanges(); // 清除選取範圍
                 updateTask();
             } else {
                 totalFail++;
                 document.getElementById('fail-counter').innerText = totalFail;
-                showFeedback("✗ 選取不精準", "text-red-500");
+                showFeedback("✗ 選取不夠精準，再試一次", "text-red-500");
                 document.getElementById('hint-container').classList.remove('hidden');
                 document.getElementById('hint-container').innerText = "提示：" + target.hint;
             }
@@ -312,14 +306,17 @@
             const flow = gameFlow[currentStepIdx];
             document.getElementById('progress-val').innerText = (currentStepIdx + 1) + " / 4";
             const btn = document.getElementById('synth-btn');
+            
             if (collectedInStep < flow.evidences.length) {
                 document.getElementById('task-stage').innerText = `搜集證據 (${collectedInStep}/${flow.evidences.length})`;
                 document.getElementById('task-desc').innerText = flow.evidences[collectedInStep].q;
-                btn.disabled = true; btn.className = "w-full py-3 mt-2 rounded-xl font-black bg-stone-300 text-stone-500";
+                btn.disabled = true; 
+                btn.className = "w-full py-3 mt-2 rounded-xl font-black bg-stone-300 text-stone-500";
             } else {
-                document.getElementById('task-stage').innerText = "證據齊全";
-                document.getElementById('task-desc').innerText = "點擊按鈕進行邏輯合成";
-                btn.disabled = false; btn.className = "w-full py-3 mt-2 rounded-xl font-black bg-amber-600 text-white shadow-lg cursor-pointer";
+                document.getElementById('task-stage').innerText = "證據已齊全";
+                document.getElementById('task-desc').innerText = "點擊下方按鈕進行邏輯合成";
+                btn.disabled = false; 
+                btn.className = "w-full py-3 mt-2 rounded-xl font-black bg-amber-600 text-white shadow-lg cursor-pointer";
                 btn.onclick = startCloze;
             }
         }
@@ -330,7 +327,8 @@
                 `<span class="drop-slot" data-answer="${p}" onclick="showMC(this, event)">點擊選擇</span>`
             );
             const btn = document.getElementById('synth-btn');
-            btn.innerText = "驗證邏輯"; btn.onclick = verifyCloze;
+            btn.innerText = "驗證邏輯"; 
+            btn.onclick = verifyCloze;
         }
 
         function showMC(slot, e) {
@@ -341,12 +339,16 @@
                 const d = document.createElement('div');
                 d.className = "p-3 border-b last:border-0 hover:bg-amber-100 cursor-pointer font-bold";
                 d.innerText = opt;
-                d.onclick = (ev) => { ev.stopPropagation(); slot.innerText = opt; pop.style.display = 'none'; };
+                d.onclick = (ev) => { 
+                    ev.stopPropagation(); 
+                    slot.innerText = opt; 
+                    pop.style.display = 'none'; 
+                };
                 pop.appendChild(d);
             });
             const r = slot.getBoundingClientRect();
             pop.style.display = 'flex';
-            pop.style.top = (r.bottom + 5) + "px";
+            pop.style.top = (r.bottom + window.scrollY + 5) + "px";
             pop.style.left = r.left + "px";
         }
 
@@ -358,20 +360,26 @@
                 f.className = "p-2 bg-white border border-amber-600 text-amber-900 rounded font-bold text-xs shadow-sm";
                 f.innerText = "📍 " + gameFlow[currentStepIdx].synthesis;
                 document.getElementById('target-points').appendChild(f);
-                currentStepIdx++; collectedInStep = 0;
+                currentStepIdx++; 
+                collectedInStep = 0;
                 if (currentStepIdx < gameFlow.length) {
                     document.getElementById('cloze-area').classList.add('hidden');
                     updateTask();
                     document.getElementById('synth-btn').innerText = "等待證據";
-                } else { document.getElementById('name-modal').style.display = 'flex'; }
-            } else { totalFail++; showFeedback("✗ 邏輯錯誤", "text-red-500"); }
+                } else { 
+                    document.getElementById('name-modal').style.display = 'flex'; 
+                }
+            } else { 
+                totalFail++; 
+                showFeedback("✗ 邏輯推理錯誤", "text-red-500"); 
+            }
         }
 
         function submitAndFinish() {
             const c = document.getElementById('user-class').value;
             const n = document.getElementById('user-num').value;
             const nm = document.getElementById('user-name').value;
-            if(!c || !n || !nm) return alert("請填寫班別、班號和姓名");
+            if(!c || !n || !nm) return alert("請完整填寫資料以生成證書");
             document.getElementById('display-class').innerText = c;
             document.getElementById('display-num').innerText = n;
             document.getElementById('display-name').innerText = nm;
@@ -381,7 +389,8 @@
 
         function showFeedback(m, c) {
             const el = document.getElementById('feedback-area');
-            el.innerText = m; el.className = "text-center h-6 text-sm font-bold mt-1 " + c;
+            el.innerText = m; 
+            el.className = "text-center h-6 text-sm font-bold mt-1 " + c;
         }
 
         window.onclick = () => document.getElementById('mc-popover').style.display = 'none';
