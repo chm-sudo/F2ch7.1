@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap');
 
         /* ====== 字體大小統一設定 ====== */
-        html, body, div, span, h1, h2, h3, p, button, input {
+        html, body, div, span, h1, h2, h3, p, button, input, li {
             font-size: 1.2rem !important; 
             line-height: 1.6 !important;
         }
@@ -201,6 +201,7 @@
             <h2 class="font-black text-amber-900 mb-4 text-center">任務完成！</h2>
             <div class="space-y-3">
                 <input type="text" id="user-class" placeholder="請輸入班別 (如 4A)" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
+                <input type="number" id="user-num" placeholder="請輸入班號 (如 15)" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
                 <input type="text" id="user-name" placeholder="請輸入姓名" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
                 <button id="final-submit-btn" class="w-full py-4 bg-amber-600 text-white rounded-xl font-black shadow-lg">提交並領取證書</button>
             </div>
@@ -210,12 +211,31 @@
     <div id="finish-screen" class="modal-overlay overflow-y-auto py-10">
         <div class="bg-white p-6 rounded-3xl text-center border-8 border-double border-amber-600 max-w-2xl w-full mx-auto my-auto shadow-2xl">
             <h2 class="font-black text-amber-900 mb-2">榮譽證書</h2>
-            <p class="mb-4"><span id="display-class" class="font-bold text-amber-700"></span> <span id="display-name" class="font-bold text-amber-700"></span> 同學：</p>
+            <p class="mb-4">
+                <span id="display-class" class="font-bold text-amber-700"></span> 班 
+                <span id="display-num" class="font-bold text-amber-700"></span> 號 
+                <span id="display-name" class="font-bold text-amber-700"></span> 同學：
+            </p>
             <div class="bg-amber-100 p-4 rounded-xl mb-6 inline-block px-10">
                 <p class="text-amber-800 font-bold mb-1">獲得稱號</p>
                 <h3 id="display-title" class="font-black text-amber-900"></h3>
             </div>
-            <button onclick="location.reload()" class="block w-full text-stone-400 font-bold mt-4">重新開始</button>
+            
+            <div class="text-left bg-stone-50 border-2 border-amber-200 p-4 rounded-xl mb-4 mx-2">
+                <h3 class="text-amber-800 font-black mb-3 border-b-2 border-amber-200 pb-2 flex items-center gap-2">
+                    <span>📝</span> 學習總結：《再論包裝》
+                </h3>
+                <ul class="text-stone-700 font-bold space-y-2 pl-2">
+                    <li>📍 分論一：過度包裝造成價值失衡。</li>
+                    <li>📍 分論二：垃圾處理已成全球危機。</li>
+                    <li>📍 分論三：自然資源並非取之不盡。</li>
+                    <li class="text-amber-700 mt-3 pt-2 border-t border-amber-100">
+                        ⭐ 中心論點：應停止過度包裝，保護資源。
+                    </li>
+                </ul>
+            </div>
+
+            <button onclick="location.reload()" class="block w-full text-stone-400 font-bold mt-4 hover:text-amber-600 transition-colors">重新開始</button>
         </div>
     </div>
 
@@ -393,7 +413,6 @@
         function finalizeStep() {
             const f = gameFlow[currentStepIdx];
             const p = document.createElement('div');
-            // 新增的小橫幅樣式
             p.className = "p-2 bg-amber-50 border-2 border-amber-600 text-amber-900 rounded font-black shadow-sm w-full";
             p.innerText = "📍 " + f.synthesis;
             document.getElementById('target-points').appendChild(p);
@@ -407,10 +426,14 @@
         }
 
         function submitAndFinish() {
-            const uClass = document.getElementById('user-class').value;
-            const uName = document.getElementById('user-name').value;
-            if (!uClass || !uName) return alert("請填寫班別姓名");
+            const uClass = document.getElementById('user-class').value.trim();
+            const uNum = document.getElementById('user-num').value.trim();
+            const uName = document.getElementById('user-name').value.trim();
+            
+            if (!uClass || !uNum || !uName) return alert("請完整填寫班別、班號與姓名！");
+            
             document.getElementById('display-class').innerText = uClass;
+            document.getElementById('display-num').innerText = uNum;
             document.getElementById('display-name').innerText = uName;
             document.getElementById('display-title').innerText = totalFail <= 3 ? "🌿 環保包裝美學大師" : "🛡️ 拒絕虛榮包裝先鋒";
             document.getElementById('name-modal').style.display = 'none';
