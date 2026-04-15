@@ -8,7 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap');
 
-        /* 統一字體設定 */
+        /* 統一字體 */
         html, body, div, span, h1, h2, h3, p, button, input {
             font-size: 1.15rem !important; 
             line-height: 1.5 !important;
@@ -21,6 +21,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
         @media (min-width: 768px) {
@@ -32,8 +33,9 @@
         .selectable-text {
             user-select: text !important;
             -webkit-user-select: text !important;
-            line-height: 2 !important; 
+            line-height: 2.2 !important; 
             color: #2d2d2d;
+            cursor: text;
         }
 
         .cardboard-panel { background-color: #f5e6d3; border: 2px solid #d4b483; }
@@ -60,7 +62,7 @@
             border: 2px solid #d97706;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000;
+            z-index: 3000;
             padding: 10px;
             flex-direction: column;
         }
@@ -94,9 +96,13 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 1000;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* 證書總結樣式 */
+        #verify-btn:active { transform: translateX(-50%) scale(0.9); background: #b45309; }
+
         .summary-box {
             background: #fff;
             border: 2px solid #d4b483;
@@ -106,16 +112,16 @@
             margin-top: 1rem;
         }
         .summary-title {
-            color: #92400e;
-            font-weight: 900;
-            border-bottom: 2px solid #fde68a;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
+            color: #92400e; font-weight: 900; border-bottom: 2px solid #fde68a;
+            padding-bottom: 0.5rem; margin-bottom: 1rem;
         }
         .summary-item { margin-bottom: 0.75rem; }
         .summary-label { color: #b45309; font-weight: bold; display: block; }
         .summary-content { color: #444; margin-left: 0.5rem; }
         .summary-evidence { color: #666; font-size: 0.95rem !important; font-style: italic; margin-left: 1rem; display: block; border-left: 3px solid #e5e7eb; padding-left: 0.5rem; margin-top: 0.25rem; }
+
+        /* 指引文字樣式 */
+        .instruction-tip { font-size: 0.85rem !important; color: #92400e; font-weight: normal; margin-top: 2px; opacity: 0.9; }
     </style>
 </head>
 <body class="p-3 md:p-4 gap-3 md:gap-4">
@@ -142,7 +148,9 @@
                 <div id="text-canvas" class="selectable-text font-serif"></div>
                 <div class="h-32"></div>
             </div>
-            <button id="verify-btn"><span>✔️</span><span class="font-black">驗證</span></button>
+            <button id="verify-btn" ontouchstart="">
+                <span>✔️</span><span class="font-black">驗證</span>
+            </button>
         </div>
 
         <div class="flex-[2.8] flex flex-col gap-3">
@@ -150,7 +158,10 @@
                 <div id="hint-container" class="hidden bg-white border border-amber-200 p-2 rounded text-amber-800 mb-2 font-bold"></div>
                 <div class="bg-white/95 p-4 rounded-xl border-2 border-amber-200 shadow-sm flex-1 flex flex-col overflow-hidden">
                     <div id="task-info">
-                        <span id="task-stage" class="font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border">初始化...</span>
+                        <div class="flex flex-col">
+                            <span id="task-stage" class="font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border inline-block w-fit">初始化...</span>
+                            <div class="instruction-tip">(長按篇章中的文字後，拖動兩端小圓點進行選取，再點選“驗證”)</div>
+                        </div>
                         <p id="task-desc" class="text-stone-800 font-bold mt-2"></p>
                     </div>
                     <div class="flex-1 overflow-y-auto mt-2 flex flex-col">
@@ -171,8 +182,8 @@
     </div>
 
     <div id="name-modal" class="modal-overlay">
-        <div class="bg-white p-6 rounded-3xl shadow-2xl border-4 border-amber-600 max-w-sm w-full mx-4">
-            <h2 class="font-black text-amber-900 mb-4 text-center">任務圓滿完成！</h2>
+        <div class="bg-white p-6 rounded-3xl shadow-2xl border-4 border-amber-600 max-w-sm w-full mx-4 text-center">
+            <h2 class="font-black text-amber-900 mb-4">任務圓滿完成！</h2>
             <div class="space-y-3">
                 <input type="text" id="user-class" placeholder="請輸入班別 (例: 4A)" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
                 <input type="number" id="user-num" placeholder="請輸入班號" class="w-full p-3 border-2 border-amber-100 rounded-xl font-bold">
@@ -183,14 +194,11 @@
     </div>
 
     <div id="finish-screen" class="modal-overlay overflow-y-auto py-10">
-        <div class="bg-white p-8 rounded-3xl text-center border-8 border-double border-amber-600 max-w-3xl w-full mx-auto shadow-2xl relative my-auto">
+        <div class="bg-white p-6 md:p-8 rounded-3xl text-center border-8 border-double border-amber-600 max-w-3xl w-full mx-auto shadow-2xl relative my-auto">
             <div class="text-amber-900 font-black text-3xl mb-2">榮 譽 證 書</div>
             <p class="mb-6 text-amber-800 text-xl font-bold">
-                <span id="display-class"></span> 班 
-                <span id="display-num"></span> 號 
-                <span id="display-name"></span> 同學：
+                <span id="display-class"></span> 班 <span id="display-num"></span> 號 <span id="display-name"></span> 同學：
             </p>
-            
             <div class="bg-amber-100 p-4 rounded-xl mb-6 inline-block border-2 border-amber-200 px-10">
                 <p class="text-amber-700 font-bold mb-1">獲得稱號</p>
                 <h3 id="display-title" class="font-black text-amber-900 text-2xl"></h3>
@@ -198,36 +206,15 @@
 
             <div class="summary-box">
                 <div class="summary-title text-center text-xl">📝 《再論包裝》學習總結</div>
-                
-                <div class="summary-item">
-                    <span class="summary-label">● 中心論點：</span>
-                    <span class="summary-content font-bold">商品過度包裝的問題。</span>
-                </div>
-
-                <div class="summary-item">
-                    <span class="summary-label">● 分論一：</span>
-                    <span class="summary-content">現代商品過度包裝，商品的包裝成本遠高於商品實際價值，造成浪費。</span>
-                    <span class="summary-evidence">論據：舉出現今周村燒餅以彩繪燙金的鐵盒包裝作例子、商品本身價值不高，但包裝成本卻比商品價值高昂得多。</span>
-                </div>
-
-                <div class="summary-item">
-                    <span class="summary-label">● 分論二：</span>
-                    <span class="summary-content">今人過度包裝製造垃圾，最後演變成全球性問題。</span>
-                    <span class="summary-evidence">論據：古代人生活簡樸，沒有多少垃圾；現代人製造過多垃圾，每一個國家都為處理垃圾大傷腦筋。</span>
-                </div>
-
-                <div class="summary-item">
-                    <span class="summary-label">● 分論三：</span>
-                    <span class="summary-content">指出自然資源並非「不竭」與「無盡藏」的，若人類繼續浪費，自然資源終有一天會耗盡。</span>
-                </div>
-
-                <div class="summary-item">
-                    <span class="summary-label">● 結論：</span>
-                    <span class="summary-content font-bold text-amber-700">聰明的中國人應該懸崖勒馬、改弦更張，給子孫多留一點資源。</span>
-                </div>
+                <div class="summary-item"><span class="summary-label">● 中心論點：</span><span class="summary-content font-bold">商品過度包裝的問題。</span></div>
+                <div class="summary-item"><span class="summary-label">● 分論一：</span><span class="summary-content">現代商品過度包裝，商品的包裝成本遠高於商品實際價值，造成浪費。</span>
+                    <span class="summary-evidence">論據：舉出現今周村燒餅以彩繪燙金的鐵盒包裝作例子、商品本身價值不高，但包裝成本卻比商品價值高昂得多。</span></div>
+                <div class="summary-item"><span class="summary-label">● 分論二：</span><span class="summary-content">今人過度包裝製造垃圾，最後演變成全球性問題。</span>
+                    <span class="summary-evidence">論據：古代人生活簡樸，沒有多少垃圾；現代人製造過多垃圾，每一個國家都為處理垃圾大傷腦筋。</span></div>
+                <div class="summary-item"><span class="summary-label">● 分論三：</span><span class="summary-content">指出自然資源並非「不竭」與「無盡藏」的，若人類繼續浪費，自然資源終有一天會耗盡。</span></div>
+                <div class="summary-item"><span class="summary-label">● 結論：</span><span class="summary-content font-bold text-amber-700">聰明的中國人應該懸崖勒馬、改弦更張，給子孫多留一點資源。</span></div>
             </div>
-
-            <button onclick="location.reload()" class="mt-8 text-stone-400 font-bold hover:text-amber-600 underline">重新挑戰</button>
+            <button onclick="location.reload()" class="mt-8 text-stone-400 font-bold underline">重新挑戰</button>
         </div>
     </div>
 
@@ -254,7 +241,10 @@
 
         function init() {
             document.getElementById('text-canvas').innerHTML = articleText.map(t => `<p class="mb-4">${t}</p>`).join('');
-            document.getElementById('verify-btn').onclick = checkSelection;
+            document.getElementById('verify-btn').addEventListener('click', checkSelection);
+            document.getElementById('verify-btn').addEventListener('touchend', (e) => {
+                e.preventDefault(); checkSelection();
+            });
             document.getElementById('final-submit-btn').onclick = submitAndFinish;
             updateTask();
         }
@@ -263,13 +253,22 @@
             const selection = window.getSelection();
             const selectedText = selection.toString().trim();
             const flow = gameFlow[currentStepIdx];
-            if (!selectedText) { showFeedback("⚠️ 請先在文中選取文字", "text-red-500"); return; }
+            
+            if (!selectedText || selectedText.length < 2) { 
+                showFeedback("⚠️ 請先在文中選取文字", "text-red-500"); 
+                return; 
+            }
+
             const clean = (s) => s.replace(/[\s\r\n\t\(\)\d\.,，。：「」『』!！?？❶-❽]/g, "");
             const cleanedSel = clean(selectedText);
             const target = flow.evidences[collectedInStep];
-            const isCorrect = target.keywords.some(k => cleanedSel.includes(clean(k)) || clean(k).includes(cleanedSel));
             
-            if (isCorrect && cleanedSel.length >= 2) {
+            const isCorrect = target.keywords.some(k => {
+                const ck = clean(k);
+                return cleanedSel.includes(ck) || ck.includes(cleanedSel);
+            });
+            
+            if (isCorrect) {
                 addEvidence(target.label, selectedText);
                 collectedInStep++;
                 showFeedback("✓ 正確！", "text-green-600");
