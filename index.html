@@ -8,7 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;700&display=swap');
 
-        /* 基礎字體設定 */
+        /* 統一字體設定 */
         html, body, div, span, h1, h2, h3, p, button, input {
             font-size: 1.15rem !important; 
             line-height: 1.5 !important;
@@ -96,21 +96,26 @@
             transform: translateX(-50%);
         }
 
-        /* 邏輯圖文字版樣式 */
-        .logic-map {
+        /* 證書總結樣式 */
+        .summary-box {
             background: #fff;
             border: 2px solid #d4b483;
-            border-radius: 15px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 1.25rem;
             text-align: left;
+            margin-top: 1rem;
         }
-        .logic-node {
-            background: #fffbeb;
-            border-left: 5px solid #d97706;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+        .summary-title {
+            color: #92400e;
+            font-weight: 900;
+            border-bottom: 2px solid #fde68a;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
+        .summary-item { margin-bottom: 0.75rem; }
+        .summary-label { color: #b45309; font-weight: bold; display: block; }
+        .summary-content { color: #444; margin-left: 0.5rem; }
+        .summary-evidence { color: #666; font-size: 0.95rem !important; font-style: italic; margin-left: 1rem; display: block; border-left: 3px solid #e5e7eb; padding-left: 0.5rem; margin-top: 0.25rem; }
     </style>
 </head>
 <body class="p-3 md:p-4 gap-3 md:gap-4">
@@ -178,52 +183,51 @@
     </div>
 
     <div id="finish-screen" class="modal-overlay overflow-y-auto py-10">
-        <div class="bg-white p-8 rounded-3xl text-center border-8 border-double border-amber-600 max-w-3xl w-full mx-auto shadow-2xl relative">
+        <div class="bg-white p-8 rounded-3xl text-center border-8 border-double border-amber-600 max-w-3xl w-full mx-auto shadow-2xl relative my-auto">
             <div class="text-amber-900 font-black text-3xl mb-2">榮 譽 證 書</div>
-            <p class="mb-6 text-amber-800 text-xl">
-                <span id="display-class" class="underline"></span> 班 
-                <span id="display-num" class="underline"></span> 號 
-                <span id="display-name" class="underline"></span> 同學：
+            <p class="mb-6 text-amber-800 text-xl font-bold">
+                <span id="display-class"></span> 班 
+                <span id="display-num"></span> 號 
+                <span id="display-name"></span> 同學：
             </p>
             
-            <div class="bg-amber-50 p-4 rounded-xl mb-6 inline-block border-2 border-amber-200">
-                <p class="text-amber-700 font-bold">恭喜獲得稱號</p>
+            <div class="bg-amber-100 p-4 rounded-xl mb-6 inline-block border-2 border-amber-200 px-10">
+                <p class="text-amber-700 font-bold mb-1">獲得稱號</p>
                 <h3 id="display-title" class="font-black text-amber-900 text-2xl"></h3>
             </div>
 
-            <div class="logic-map">
-                <h4 class="font-black text-amber-900 mb-4 flex items-center gap-2">
-                    <span>📝</span> 《再論包裝》學習總結
-                </h4>
+            <div class="summary-box">
+                <div class="summary-title text-center text-xl">📝 《再論包裝》學習總結</div>
                 
-                <div class="mb-4">
-                    <div class="text-sm font-bold text-amber-600 mb-1">【中心論點】</div>
-                    <div class="bg-amber-600 text-white p-3 rounded-lg font-bold text-center">
-                        應停止過度包裝，珍惜自然資源
-                    </div>
+                <div class="summary-item">
+                    <span class="summary-label">● 中心論點：</span>
+                    <span class="summary-content font-bold">商品過度包裝的問題。</span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="logic-node">
-                        <div class="text-xs font-bold text-amber-600">分論點一</div>
-                        <div class="font-bold text-stone-800">包裝成本 > 商品價值<br><span class="text-sm font-normal text-stone-500">(周村燒餅鐵盒例)</span></div>
-                    </div>
-                    <div class="logic-node">
-                        <div class="text-xs font-bold text-amber-600">分論點二</div>
-                        <div class="font-bold text-stone-800">製造大量垃圾<br><span class="text-sm font-normal text-stone-500">(處理垃圾困難)</span></div>
-                    </div>
-                    <div class="logic-node">
-                        <div class="text-xs font-bold text-amber-600">分論點三</div>
-                        <div class="font-bold text-stone-800">資源並非不竭<br><span class="text-sm font-normal text-stone-500">(應為後代留資源)</span></div>
-                    </div>
+                <div class="summary-item">
+                    <span class="summary-label">● 分論一：</span>
+                    <span class="summary-content">現代商品過度包裝，商品的包裝成本遠高於商品實際價值，造成浪費。</span>
+                    <span class="summary-evidence">論據：舉出現今周村燒餅以彩繪燙金的鐵盒包裝作例子、商品本身價值不高，但包裝成本卻比商品價值高昂得多。</span>
                 </div>
 
-                <div class="mt-4 p-3 bg-stone-100 rounded-lg text-sm text-stone-600 italic">
-                    💡 總結：作者透過對比古今包裝，批評捨本逐末的社會現象，呼籲改弦更張。
+                <div class="summary-item">
+                    <span class="summary-label">● 分論二：</span>
+                    <span class="summary-content">今人過度包裝製造垃圾，最後演變成全球性問題。</span>
+                    <span class="summary-evidence">論據：古代人生活簡樸，沒有多少垃圾；現代人製造過多垃圾，每一個國家都為處理垃圾大傷腦筋。</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">● 分論三：</span>
+                    <span class="summary-content">指出自然資源並非「不竭」與「無盡藏」的，若人類繼續浪費，自然資源終有一天會耗盡。</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">● 結論：</span>
+                    <span class="summary-content font-bold text-amber-700">聰明的中國人應該懸崖勒馬、改弦更張，給子孫多留一點資源。</span>
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="mt-8 text-stone-400 font-bold hover:text-amber-600">重新開始挑戰</button>
+            <button onclick="location.reload()" class="mt-8 text-stone-400 font-bold hover:text-amber-600 underline">重新挑戰</button>
         </div>
     </div>
 
@@ -241,7 +245,7 @@
 
         const gameFlow = [
             { step: 1, evidences: [{ q: "1. 找出：周村燒餅原本的包裝方法", keywords: ["過去只是十個或八九個一摞，用白紙一包"], label: "舊有包裝", hint: "第 ❸ 段" }, { q: "2. 找出：現今周村燒餅的包裝", keywords: ["鐵盒，彩繪燙金，光彩奪目"], label: "新式包裝", hint: "第 ❹ 段" }, { q: "3. 找出：商品價值與包裝成本的對比", keywords: ["後者比前者要貴"], label: "價值倒置", hint: "第 ❺ 段：找出「比」字" }], cloze: "分論點：現代商品{過度包裝}，其成本{遠高於}商品價值，造成{浪費}。", mcOptions: { "過度包裝": ["簡單包裝", "過度包裝"], "遠高於": ["遠低於", "遠高於"], "浪費": ["節約", "浪費"] }, synthesis: "分論一：過度包裝造成價值失衡。" },
-            { step: 2, evidences: [{ q: "4. 找出：古代處理垃圾的情況", keywords: ["沒有多少垃圾，也決不會自己製造垃圾"], label: "古代環境", hint: "第 ❻ 段" }, { q: "5. 找出：現代處理垃圾的情況", keywords: ["每一個國家的政府都為處理垃圾而大傷腦筋"], label: "現代問題", hint: "國家的政府的問題" }], cloze: "分論點：這會製造大量{垃圾}，演變成{全球性問題}。", mcOptions: { "垃圾": ["財富", "垃圾"], "全球性問題": ["個人問題", "全球性問題"] }, synthesis: "分論二：垃圾處理已成全球危機。" },
+            { step: 2, evidences: [{ q: "4. 找出：古代處理垃圾的情況", keywords: ["沒有多少垃圾，也決不會自己製造垃圾"], label: "古代環境", hint: "第 ❻ 段" }, { q: "5. 找出：現代處理垃圾的情況", keywords: ["每一個國家的政府都為處理垃圾而大傷腦筋"], label: "現代問題", hint: "第 ❻ 段" }], cloze: "分論點：這會製造大量{垃圾}，演變成{全球性問題}。", mcOptions: { "垃圾": ["財富", "垃圾"], "全球性問題": ["個人問題", "全球性問題"] }, synthesis: "分論二：垃圾處理已成全球危機。" },
             { step: 3, evidences: [{ q: "6. 找出：文中提及資源性質的描述", keywords: ["資源畢竟是有限的", "造物是有盡藏的，用之是有竭的"], label: "資源危機", hint: "第 ❼ 段" }], cloze: "分論點：自然資源並非{不竭}，若人類繼續{浪費}，資源終會{耗盡}。", mcOptions: { "不竭": ["有限", "不竭"], "浪費": ["珍惜", "浪費"], "耗盡": ["再生", "耗盡"] }, synthesis: "分論三：自然資源並非取之不盡。" },
             { step: 4, evidences: [{ q: "7. 找出：作者對中國人的具體建議", keywords: ["懸崖勒馬", "改弦更張", "再也不製造那一種大而無當的商品包裝"], label: "行動建議", hint: "第 ❽ 段" }, { q: "8. 找出：全文開篇的核心感受", keywords: ["值得擔憂"], label: "核心論點", hint: "第 ❶ 段" }], cloze: "中心論點：過度包裝問題{值得擔憂}。我們應{不再製造大而無當的包裝}。", mcOptions: { "值得擔憂": ["值得擔憂", "不足掛齒"], "不再製造大而無當的包裝": ["加強包裝", "不再製造大而無當的包裝"] }, synthesis: "中心論點：應停止過度包裝，保護資源。" }
         ];
@@ -275,7 +279,7 @@
             } else {
                 totalFail++;
                 document.getElementById('fail-counter').innerText = totalFail;
-                showFeedback("✗ 選取不精準", "text-red-500");
+                showFeedback("✗ 不夠精準，再試試", "text-red-500");
                 document.getElementById('hint-container').classList.remove('hidden');
                 document.getElementById('hint-container').innerText = "提示：" + target.hint;
             }
@@ -299,9 +303,9 @@
                 btn.className = "mt-1 w-full py-3 bg-stone-300 text-stone-500 rounded-xl font-black";
             } else {
                 document.getElementById('task-stage').innerText = "證據已齊全";
-                document.getElementById('task-desc').innerText = "請點擊下方按鈕進行邏輯合成";
+                document.getElementById('task-desc').innerText = "點擊按鈕進行邏輯合成";
                 btn.disabled = false;
-                btn.className = "mt-1 w-full py-3 bg-amber-600 text-white rounded-xl font-black shadow-lg";
+                btn.className = "mt-1 w-full py-3 bg-amber-600 text-white rounded-xl font-black shadow-lg cursor-pointer";
                 btn.onclick = startCloze;
             }
         }
@@ -355,7 +359,7 @@
             const c = document.getElementById('user-class').value;
             const n = document.getElementById('user-num').value;
             const nm = document.getElementById('user-name').value;
-            if(!c || !n || !nm) return alert("請填寫完整資料");
+            if(!c || !n || !nm) return alert("請填寫完整資料以便生成證書");
             document.getElementById('display-class').innerText = c;
             document.getElementById('display-num').innerText = n;
             document.getElementById('display-name').innerText = nm;
